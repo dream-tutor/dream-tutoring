@@ -338,7 +338,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.65);padding:48px 20px 28px
       <a href="/#reviews">후기</a>
     </nav>
     <div class="hcta">
-      <a href="tel:01048645345" class="btn-call">📞 010-4864-5345</a>
+      <a href="tel:01048645345" class="btn-call">📞 전화 상담</a>
       <button class="btn-cs" onclick="openModal()">✍️ 무료 상담</button>
     </div>
   </div>
@@ -583,12 +583,12 @@ footer{background:var(--navy);color:rgba(255,255,255,.65);padding:48px 20px 28px
           <textarea class="fta" placeholder="추가 문의사항을 적어주세요."></textarea>
         </div>
         <button type="submit" class="fsub">✍️ 무료 상담 신청하기</button>
-        <p class="fnote">📞 <strong>010-4864-5345</strong> | 09:00~21:00 (주말 가능)</p>
+        <p class="fnote">신청 후 빠르게 연락드립니다.</p>
       </form>
       <div class="success-msg" id="mainSuccess">
         <span class="success-icon">🎉</span>
         <h3>신청 완료!</h3>
-        <p>빠르게 연락드리겠습니다.<br><strong>010-4864-5345</strong></p>
+        <p>빠르게 연락드리겠습니다.</p>
       </div>
     </div>
   </div>
@@ -611,22 +611,22 @@ footer{background:var(--navy);color:rgba(255,255,255,.65);padding:48px 20px 28px
     <div class="fc">
       <h4>광명시 과외</h4>
       <ul class="flinks">
-        <li><a href="/region/gwangmyeong/gwangmyeong-dong/math">광명동 수학 과외</a></li>
-        <li><a href="/region/gwangmyeong/gwangmyeong-dong/english">광명동 영어 과외</a></li>
-        <li><a href="/region/gwangmyeong/cheolsan-dong/math">철산동 수학 과외</a></li>
-        <li><a href="/region/gwangmyeong/cheolsan-dong/english">철산동 영어 과외</a></li>
-        <li><a href="/region/gwangmyeong/haan-dong/math">하안동 수학 과외</a></li>
-        <li><a href="/region/gwangmyeong/haan-dong/english">하안동 영어 과외</a></li>
-        <li><a href="/region/gwangmyeong/soha-dong/math">소하동 수학 과외</a></li>
-        <li><a href="/region/gwangmyeong/iljik-dong/math">일직동 수학 과외</a></li>
+        <li><a href="/광명동수학과외">광명동 수학 과외</a></li>
+        <li><a href="/광명동영어과외">광명동 영어 과외</a></li>
+        <li><a href="/철산동수학과외">철산동 수학 과외</a></li>
+        <li><a href="/철산동영어과외">철산동 영어 과외</a></li>
+        <li><a href="/하안동수학과외">하안동 수학 과외</a></li>
+        <li><a href="/하안동영어과외">하안동 영어 과외</a></li>
+        <li><a href="/소하동수학과외">소하동 수학 과외</a></li>
+        <li><a href="/일직동수학과외">일직동 수학 과외</a></li>
       </ul>
     </div>
     <div class="fc">
       <h4>연락처</h4>
       <div style="font-size:13px;color:rgba(255,255,255,.7)">📞 상담 전화</div>
-      <div class="fphone">010-4864-5345</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7)">🕐 09:00 ~ 21:00</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">📅 주말·공휴일 상담 가능</div>
+      
+      
+      
       <button onclick="openModal()" style="margin-top:14px;width:100%;padding:11px;background:var(--coral);color:#fff;font-size:13px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:inherit;">✍️ 무료 상담 신청</button>
     </div>
   </div>
@@ -675,36 +675,62 @@ footer{background:var(--navy);color:rgba(255,255,255,.65);padding:48px 20px 28px
       </div>
       <div class="fg"><label class="fl">학교명</label><input type="text" class="fi" placeholder="예: 철산중학교"></div>
       <button type="submit" class="fsub">✍️ 신청하기</button>
-      <p class="fnote">📞 <strong>010-4864-5345</strong> | 09:00~21:00</p>
+      <p class="fnote">신청 후 빠르게 연락드립니다.</p>
     </form>
     <div class="success-msg" id="modalSuccess">
       <span class="success-icon">🎉</span><h3>신청 완료!</h3>
-      <p>빠르게 연락드리겠습니다.<br><strong>010-4864-5345</strong></p>
+      <p>빠르게 연락드리겠습니다.</p>
     </div>
   </div>
 </div>
 
 <script>
+
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbysEqIGSI9Dz4h4jup9Rn72KBNuuCObBifH_wAPSePhHt3wMe4RDBOxlwupxmrPeXqVjw/exec';
 function openModal(){document.getElementById("modalOv").classList.add("open");document.body.style.overflow="hidden";}
 function closeModal(){document.getElementById("modalOv").classList.remove("open");document.body.style.overflow="";}
 function closeOut(e){if(e.target===document.getElementById("modalOv"))closeModal();}
-function submitForm(e){e.preventDefault();document.getElementById("mainForm").style.display="none";document.getElementById("mainSuccess").style.display="block";}
-function submitModal(e){e.preventDefault();document.getElementById("modalForm").style.display="none";document.getElementById("modalSuccess").style.display="block";setTimeout(closeModal,3000);}
+function getFormData(form){
+  var inputs=form.querySelectorAll("input,select,textarea");
+  var fields=["name","phone","grade","subject","school","message"];
+  var data={};
+  inputs.forEach(function(el,i){if(fields[i])data[fields[i]]=el.value;});
+  return data;
+}
+function sendToGAS(data){
+  fetch(GAS_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(data)}).catch(function(e){console.log(e);});
+}
+function submitForm(e){
+  e.preventDefault();
+  var form=document.getElementById("mainForm");
+  sendToGAS(getFormData(form));
+  form.style.display="none";
+  document.getElementById("mainSuccess").style.display="block";
+}
+function submitModal(e){
+  e.preventDefault();
+  var form=document.getElementById("modalForm");
+  sendToGAS(getFormData(form));
+  form.style.display="none";
+  document.getElementById("modalSuccess").style.display="block";
+  setTimeout(closeModal,3000);
+}
 function showGrade(el,id){
-  document.querySelectorAll(".grade-content").forEach(c=>c.style.display="none");
-  document.querySelectorAll(".grade-tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".grade-content").forEach(function(c){c.style.display="none";});
+  document.querySelectorAll(".grade-tab").forEach(function(t){t.classList.remove("active");});
   document.getElementById(id).style.display="block";
   el.classList.add("active");
 }
-document.querySelectorAll("input[type=tel]").forEach(i=>{
+document.querySelectorAll("input[type=tel]").forEach(function(i){
   i.addEventListener("input",function(){
-    let v=this.value.replace(/\\D/g,"");
-    if(v.length>=11)v=v.replace(/(\\d{3})(\\d{4})(\\d{4})/,"$1-$2-$3");
-    else if(v.length>=7)v=v.replace(/(\\d{3})(\\d{4})/,"$1-$2-");
-    else if(v.length>=4)v=v.replace(/(\\d{3})/,"$1-");
+    var v=this.value.replace(/\D/g,"");
+    if(v.length>=11)v=v.replace(/(\d{3})(\d{4})(\d{4})/,"$1-$2-$3");
+    else if(v.length>=7)v=v.replace(/(\d{3})(\d{4})/,"$1-$2-");
+    else if(v.length>=4)v=v.replace(/(\d{3})/,"$1-");
     this.value=v;
   });
 });
+
 </script>
 </body>
 </html>
