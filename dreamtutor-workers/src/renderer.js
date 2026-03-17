@@ -1,0 +1,1495 @@
+import { buildHead, buildFAQSchema } from './seo.js';
+import { layout, ctaBox, faqSection, consultForm } from './template.js';
+import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP } from './data/regions.js';
+import { DONG_SCHOOLS } from './data/schools.js';
+
+const PHONE_LINK = '01048645345';
+
+// ── 공통: 방문/화상 요금 텍스트 설명 ──────────────────
+function priceTableHtml(locationLabel, subject, isVisit) {
+  const subj = subject ? ` ${subject}` : '';
+  const visitBlock = isVisit ? `
+    <div class="price-text-block">
+      <h3>🏠 방문과외 예상 비용</h3>
+      <p>초등 월 26만원 / 중등 월 30만원 / 고1·2 월 34만원 / 고3 월 38만원</p>
+    </div>` : '';
+  return `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">PRICING</span>
+    <h2 class="sec-title">${locationLabel}${subj} 과외 <em>예상 비용</em></h2>
+    ${visitBlock}
+    <div class="price-text-block">
+      <h3>💻 화상과외 예상 비용</h3>
+      <p>초등 월 24만원 / 중등 월 27만원 / 고1·2 월 31만원 / 고3 월 33만원</p>
+    </div>
+    <p class="price-note">※ 첫 30분 무료 체험 제공 · 정확한 비용은 무료 상담 후 안내</p>
+    <p class="price-note">(주 2회·1시간 기준, 수업 횟수·시간에 따라 달라질 수 있습니다)</p>
+  </div>
+</section>`;
+}
+
+// ── 동 레벨 페이지 ──────────────────────────────────────
+export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
+  const displayDong = withSuffix ? dong : stripSuffix(dong);
+  const gradeInfo = grade ? GRADES[grade] : null;
+  const subjectInfo = subject ? SUBJECTS[subject] : null;
+  const isVisit = Object.values(VISIT_REGIONS)
+    .flatMap(g => Object.values(g).flat()).includes(dong);
+
+  const keyword = `${displayDong}${grade || ''}${subject || ''}과외`;
+  const title = `${keyword} | 1:1 전문 드림과외`;
+  const description = [
+    `${displayDong} ${grade || '초중고'} ${subject || '전과목'} 과외 전문.`,
+    isVisit ? '방문·화상 모두 가능.' : '화상과외 가능.',
+    `검증된 선생님 24시간 내 매칭. 첫 30분 무료 체험.`,
+  ].join(' ');
+
+  const url = `/${encodeURIComponent(keyword)}`;
+  const head = buildHead({ title, description, url, type: isVisit ? 'local' : 'online' });
+
+  const faqs = buildFAQs({ dong: displayDong, gu, grade, subject, isVisit });
+  const faqSchema = buildFAQSchema(faqs);
+  const nearSchoolName = DONG_SCHOOLS[dong] || null;
+  const relatedLinks = buildDongRelatedLinks({ dong, displayDong, gu, grade, subject, nearSchoolName });
+  const reviews = buildReviews(displayDong, subject);
+
+  const subjectLabel = subjectInfo ? subjectInfo.desc : (subject ? `${subject} 전 과정` : '전 과목');
+  const gradeLabel = gradeInfo ? gradeInfo.desc : '초·중·고 전 학년';
+  const gradeDetail = gradeInfo ? gradeInfo.detail : '기초부터 심화까지';
+  const subjectEmoji = subjectInfo ? subjectInfo.emoji : '📚';
+  const visitText = isVisit
+    ? '방문과외·화상과외 모두 가능합니다.'
+    : '화상과외로 집에서 편리하게 수업 받을 수 있습니다.';
+
+  const body = `
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">📍 ${sido} · ${gu}</div>
+    <h1 class="page-h1">${displayDong}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
+    <p class="page-desc">
+      ${DONG_DESC[dong] || `${gu}에 위치한 주거 지역입니다`}
+      드림과외는 ${displayDong} 인근에서 학생들을 지도해온 검증된 선생님을 연결해드립니다.
+      ${gradeLabel} ${subjectLabel} 1:1 전문 과외로, ${visitText}
+      상담 신청 후 24시간 내 매칭 가능하며, 첫 30분은 무료 체험입니다.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      ${isVisit ? '<span class="hero-chip">🏠 방문과외</span>' : ''}
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">📋 내신 전문</span>
+      <span class="hero-chip">🎓 수능 대비</span>
+      <span class="hero-chip">${subjectEmoji} ${subject || '전 과목'} 전문</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DREAMTUTOR -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">WHY DREAMTUTOR</span>
+    <h2 class="sec-title">${displayDong}에서 <em>드림과외</em>를 선택하는 이유</h2>
+    <p class="sec-desc">
+      ${displayDong} 학부모님들의 교육 관심에 부응해, 드림과외는 검증된 전문 선생님을 연결합니다.
+      학생 수준과 목표에 맞는 맞춤 커리큘럼을 제공하며, ${gradeDetail}을 목표로 하는
+      1:1 맞춤 수업으로 성적 향상을 함께 만들어드립니다.
+    </p>
+    <div class="str-grid">
+      <div class="str-card">
+        <span class="str-icon">🏆</span>
+        <div class="str-num">30<span>년+</span></div>
+        <h3>교육 노하우</h3>
+        <p>${displayDong} 지역 학생 지도 경험을 바탕으로, 30년+ 교육 노하우로 맞춤 커리큘럼을 설계합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">👥</span>
+        <div class="str-num">100<span>만+</span></div>
+        <h3>누적 회원수</h3>
+        <p>전국 100만 명 이상의 학생과 학부모가 드림과외와 함께한 교육 플랫폼입니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">👩‍🏫</span>
+        <div class="str-num">2,000<span>+</span></div>
+        <h3>전문 선생님</h3>
+        <p>각 과목·학년별 전문 선생님이 학생 맞춤 1:1 맞춤 수업을 진행합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">⚡</span>
+        <div class="str-num">24<span>h</span></div>
+        <h3>빠른 매칭</h3>
+        <p>상담 신청 후 24시간 이내 ${displayDong} ${subject || ''}전문 선생님을 연결합니다. 급하시면 전화 상담도 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">HOW IT WORKS</span>
+    <h2 class="sec-title">딱 <em>4단계</em>로 시작하세요</h2>
+    <p class="sec-desc">
+      복잡한 절차 없이 빠르고 간편하게 ${displayDong} 전문 선생님을 만나보세요.
+      전화 한 통, 폼 작성 한 번으로 내 아이에게 꼭 맞는 선생님을 찾아드립니다.
+    </p>
+    <div class="process-grid">
+      <div class="process-step">
+        <div class="process-circle">1</div>
+        <h3>무료 상담 신청</h3>
+        <p>이름·연락처·학년·과목을 입력하고 무료 상담을 신청합니다. 아래 폼 또는 전화로 신청하세요.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-circle">2</div>
+        <h3>선생님 매칭</h3>
+        <p>24시간 내 ${displayDong} 지역 ${grade || '해당 학년'} ${subject || '해당 과목'} 전문 선생님을 개인 맞춤 연결합니다.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-circle">3</div>
+        <h3>첫 30분 무료 체험</h3>
+        <p>첫 30분은 무료 체험입니다. 선생님의 수업 방식과 학생과의 궁합을 직접 확인 후 결정하세요.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-circle">4</div>
+        <h3>정기 수업 시작</h3>
+        <p>주 1~5회 맞춤 일정으로 체계적인 1:1 수업을 시작합니다. 언제든지 일정 조정이 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+${buildLearningSection(grade, subject, displayDong)}
+
+${buildSubjectStudySection(subject, displayDong)}
+
+${buildExamGuideSection(displayDong)}
+
+${priceTableHtml(displayDong, subject, isVisit)}
+
+<!-- REVIEWS -->
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">${displayDong} 학부모 <em>실제 후기</em></h2>
+    <p class="sec-desc">
+      ${displayDong}에서 드림과외를 경험한 학생과 학부모님의 실제 이야기입니다.
+      과장 없이 직접 전달받은 생생한 후기를 확인하세요.
+    </p>
+    <div class="review-grid">
+      ${reviews.map(r => `<div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">${r.text}</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
+          <div>
+            <div class="review-name">${r.name}</div>
+            <div class="review-info">${r.info}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+${ctaBox(keyword)}
+
+<!-- RELATED LINKS -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">RELATED</span>
+    <h2 class="sec-title">관련 <em>과외 정보</em></h2>
+    <p class="sec-desc">${displayDong} 주변 지역 및 다른 과목·학년별 과외 정보를 확인하세요.</p>
+    <div class="link-list">
+      ${relatedLinks}
+    </div>
+  </div>
+</section>
+
+${faqSection(faqs, faqSchema)}
+
+${consultForm({
+  leftTitle: `<em>지금 바로</em> 무료 상담<br>신청하세요`,
+  leftDesc: `${displayDong} 지역 ${subject || ''}${grade ? grade + ' ' : ''}전문 선생님을<br>24시간 내 연결해드립니다.`,
+  leftPts: [
+    '상담 후 24시간 내 선생님 매칭',
+    '첫 30분 무료 체험 제공',
+    `${displayDong} 학교별 내신 전문 선생님`,
+    '맞춤 커리큘럼 제공',
+  ],
+  regionValue: displayDong,
+})}`;
+
+  const breadcrumb = [
+    { label: sido },
+    { label: gu, url: `/${encodeURIComponent(stripGuSuffix(gu) + '과외')}` },
+    { label: keyword },
+  ];
+
+  return layout({ head, body, breadcrumb, keyword, region: displayDong });
+}
+
+// ── 시군구 레벨 페이지 ─────────────────────────────────
+export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
+  const displayGu = withSuffix ? gu : stripGuSuffix(gu);
+  const keyword = `${displayGu}${grade || ''}${subject || ''}과외`;
+  const title = `${keyword} | 드림과외`;
+  const description = `${displayGu} ${grade || '초중고'} ${subject || '전과목'} 과외. 방문·화상 모두 가능. 검증된 선생님 24시간 매칭. 첫 30분 무료 체험.`;
+
+  const url = `/${encodeURIComponent(keyword)}`;
+  const head = buildHead({ title, description, url, type: 'local' });
+
+  const dongs = ALL_REGIONS[sido]?.[gu] || [];
+
+  const subjectLinks = Object.entries(SUBJECTS).map(([s, info]) =>
+    `<a href="/${encodeURIComponent(displayGu + s + '과외')}">${subjectEmoji(info)} ${displayGu} ${s}과외</a>`
+  ).join('');
+
+  const gradeLinks = Object.entries(GRADES).map(([g, info]) =>
+    `<a href="/${encodeURIComponent(displayGu + g + '과외')}">${displayGu} ${g}과외</a>`
+  ).join('');
+
+  const dongCards = dongs.map(d => {
+    const ds = stripSuffix(d);
+    return `<div class="card">
+  <a href="/${encodeURIComponent(ds + (subject || '') + '과외')}">${d} ${subject || ''}과외</a>
+</div>`;
+  }).join('');
+
+  const reviews = buildReviews(displayGu, subject);
+
+  const faqs = [
+    { q: `${displayGu} 방문과외도 가능한가요?`, a: `네, ${displayGu} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업을 제공하며, 상황에 따라 화상과외로도 동일한 수준의 수업을 받을 수 있습니다.` },
+    { q: `${displayGu} 학교 내신 대비도 가능한가요?`, a: `드림과외 선생님들은 ${displayGu} 인근 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학생 학교와 학년에 맞춘 내신 대비 수업 및 서술형·수행평가 대비도 함께 진행합니다.` },
+    { q: `선생님 매칭은 얼마나 걸리나요?`, a: `상담 신청 후 24시간 이내에 최적의 선생님을 매칭해드립니다. 급하신 경우 전화 상담으로 더 빠른 매칭이 가능합니다.` },
+    { q: `${displayGu} 선생님은 어떻게 연결되나요?`, a: `드림과외는 30년+ 교육 노하우를 바탕으로 학력·경력·수업 능력을 종합적으로 평가한 전문 선생님을 연결합니다. 수강생 피드백을 지속적으로 관리하며 수업 품질을 유지합니다.` },
+    { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있으며.` },
+  ];
+  const faqSchema = buildFAQSchema(faqs);
+
+  const body = `
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">📍 ${sido}</div>
+    <h1 class="page-h1">${displayGu}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
+    <p class="page-desc">
+      ${GU_DESC[gu] || `${sido}에 위치한 지역입니다`}
+      드림과외는 ${displayGu} 인근 학교 내신 기출을 숙지한 검증된 선생님을 24시간 내 매칭해드립니다.
+      방문과외·화상과외 모두 가능하며, 첫 30분은 무료 체험 제공.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      <span class="hero-chip">🏠 방문과외</span>
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">📋 내신 전문</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">WHY DREAMTUTOR</span>
+    <h2 class="sec-title">${displayGu}에서 <em>드림과외</em>가 다른 이유</h2>
+    <p class="sec-desc">
+      드림과외는 단순한 과외 중개가 아닙니다. 30년+ 교육 노하우를 바탕으로
+      검증된 전문 선생님을 ${displayGu} 지역 학생과 연결합니다.
+      ${displayGu} 지역 학생들의 학습 특성에 맞는 맞춤 커리큘럼을 제공하며,
+          </p>
+    <div class="str-grid">
+      <div class="str-card"><span class="str-icon">🏆</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>${displayGu} 지역 학생 지도 경험을 바탕으로, 30년+ 교육 노하우로 맞춤 커리큘럼을 설계합니다.</p></div>
+      <div class="str-card"><span class="str-icon">👥</span><div class="str-num">100<span>만+</span></div><h3>누적 회원수</h3><p>전국 100만 명 이상의 학생과 학부모가 드림과외와 함께한 교육 플랫폼입니다.</p></div>
+      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>+</span></div><h3>전문 선생님</h3><p>각 과목·학년별 전문 선생님이 학생 맞춤 1:1 수업을 진행합니다.</p></div>
+      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>h</span></div><h3>빠른 매칭</h3><p>신청 후 24시간 이내 ${displayGu} 지역 전문 선생님을 연결합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">SUBJECTS</span>
+    <h2 class="sec-title">${displayGu} <em>과목별 과외</em></h2>
+    <p class="sec-desc">수학·영어·국어·과학·사회 전 과목 1:1 맞춤 과외를 제공합니다.</p>
+    <div class="link-list">${subjectLinks}</div>
+    <h2 class="sec-title" style="margin-top:40px">${displayGu} <em>학년별 과외</em></h2>
+    <p class="sec-desc">초등·중등·고등 전 학년 맞춤 과외, 수능·검정고시 전문까지 커버합니다.</p>
+    <div class="link-list">${gradeLinks}</div>
+  </div>
+</section>
+
+${dongs.length ? `<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">AREAS</span>
+    <h2 class="sec-title">${displayGu} <em>세부 지역</em> 과외</h2>
+    <p class="sec-desc">아래 지역을 선택하시면 해당 동 전문 선생님을 안내해드립니다.</p>
+    <div class="card-grid">${dongCards}</div>
+  </div>
+</section>` : ''}
+
+${buildLearningSection(grade, subject, displayGu)}
+
+${buildSubjectStudySection(subject, displayGu)}
+
+${buildExamGuideSection(displayGu)}
+
+${priceTableHtml(displayGu, subject, true)}
+
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">${displayGu} 학부모 <em>실제 후기</em></h2>
+    <p class="sec-desc">${displayGu}에서 드림과외를 경험한 학생과 학부모님의 생생한 후기입니다.</p>
+    <div class="review-grid">
+      ${reviews.map(r => `<div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">${r.text}</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
+          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+${ctaBox(keyword)}
+${faqSection(faqs, faqSchema)}
+
+${consultForm({
+  leftTitle: `<em>지금 바로</em> 무료 상담<br>신청하세요`,
+  leftDesc: `${displayGu} 지역 전문 선생님을<br>24시간 내 연결해드립니다.`,
+  leftPts: [
+    '상담 후 24시간 내 선생님 매칭',
+    '첫 30분 무료 체험',
+    `${displayGu} 학교별 내신 전문`,
+    '맞춤 커리큘럼 제공',
+  ],
+  regionValue: displayGu,
+})}`;
+
+  return layout({ head, body, breadcrumb: [{ label: sido }, { label: keyword }], keyword, region: displayGu });
+}
+
+// ── 시도 레벨 페이지 ───────────────────────────────────
+export function renderSidoPage({ sido, grade, subject }) {
+  const keyword = `${sido}${grade || ''}${subject || ''}과외`;
+  const title = `${keyword} | 드림과외`;
+  const sidoDesc = SIDO_DESC[sido] || `${sido} 지역 전문 과외`;
+  const description = `${keyword} 전문 드림과외. ${sidoDesc}. 화상과외로 전국 어디서나 가능.`;
+
+  const url = `/${encodeURIComponent(keyword)}`;
+  const head = buildHead({ title, description, url, type: 'online' });
+
+  const gus = VISIT_REGIONS[sido] ? Object.keys(VISIT_REGIONS[sido]) : [];
+  const allGus = ALL_REGIONS[sido] ? Object.keys(ALL_REGIONS[sido]) : [];
+  const allGuCards = allGus.map(gu => {
+    const gd = stripGuSuffix(gu);
+    return `<div class="card"><a href="/${encodeURIComponent(gd + (subject || '') + '과외')}">${gu} ${subject || ''}과외</a></div>`;
+  }).join('');
+
+  const subjectLinks = Object.entries(SUBJECTS).map(([s, info]) =>
+    `<a href="/${encodeURIComponent(sido + (grade || '') + s + '과외')}">${subjectEmoji(info)} ${sido} ${s}과외</a>`
+  ).join('');
+
+  const reviews = buildReviews(sido, subject);
+
+  const faqs = [
+    { q: `${sido}에서 화상과외가 효과가 있나요?`, a: `네, 화상과외는 방문과외와 동일한 1:1 수업 효과를 제공합니다. 오히려 이동 시간이 없어 더 많은 시간을 학습에 집중할 수 있으며, 전국 최고 수준의 선생님과 수업이 가능합니다.` },
+    { q: `${sido} 학교 내신 대비도 가능한가요?`, a: `드림과외 선생님들은 ${sido} 지역 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학생 학교와 학년에 맞춘 내신 대비 커리큘럼을 제공하며, 서술형·수행평가 대비도 함께 진행합니다.` },
+    { q: `선생님 매칭은 얼마나 걸리나요?`, a: `상담 신청 후 24시간 이내에 최적의 선생님을 매칭해드립니다. 급하신 경우 전화 상담으로 더 빠른 매칭이 가능합니다.` },
+    { q: `수업 교재나 교구는 어떻게 되나요?`, a: `선생님이 학생의 학교 교과서와 수준에 맞춰 교재를 추천해드립니다. 학교 교과서 위주로 수업하는 것도 가능하고, 별도 교재를 사용하는 것도 가능합니다.` },
+    { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있습니다.` },
+  ];
+  const faqSchema = buildFAQSchema(faqs);
+
+  const body = `
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">${gus.length ? `📍 ${sido}` : `🌐 ${sido} 전국 서비스`}</div>
+    <h1 class="page-h1">${sido}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
+    <p class="page-desc">
+      ${sidoDesc}. 드림과외는 ${sido} 지역 전문 과외 서비스를 제공합니다.
+      ${gus.length ? '방문과외·화상과외 모두 가능하며,' : '화상과외로 이동 없이'} 전문 선생님과 1:1 맞춤 수업을 받으세요.
+      신청 후 24시간 내 매칭, 첫 30분 무료 체험.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      ${gus.length ? '<span class="hero-chip">🏠 방문과외</span>' : ''}
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">🌐 전국 서비스</span>
+      <span class="hero-chip">📋 내신 전문</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">WHY DREAMTUTOR</span>
+    <h2 class="sec-title">${sido} <em>드림과외</em> 특징</h2>
+    <p class="sec-desc">
+      ${sidoDesc}. 드림과외 화상과외는 이동 없이 집에서 전문 선생님과
+      1:1 맞춤 수업이 가능합니다. 전문 선생님을 연결하며,
+      학교 교과서·내신 기출 위주의 맞춤 수업을 제공합니다.
+    </p>
+    <div class="str-grid">
+      <div class="str-card"><span class="str-icon">🏆</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>30년+ 교육 현장 경험으로 과목별 최적 커리큘럼 제공. 수능부터 내신까지 체계적 관리.</p></div>
+      <div class="str-card"><span class="str-icon">👥</span><div class="str-num">100<span>만+</span></div><h3>누적 회원수</h3><p>전국 100만 명 이상의 학생과 학부모가 드림과외와 함께한 교육 플랫폼입니다.</p></div>
+      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>+</span></div><h3>전문 선생님</h3><p>각 과목·학년별 전문 선생님이 화상수업에서도 동일한 1:1 맞춤 수업을 진행합니다.</p></div>
+      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>h</span></div><h3>빠른 매칭</h3><p>신청 후 24시간 이내 전문 선생님을 연결합니다. 지역 제한 없이 맞춤 매칭.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">SUBJECTS</span>
+    <h2 class="sec-title">${sido} <em>과목별 과외</em></h2>
+    <p class="sec-desc">수학·영어·국어·과학·사회·한국사 전 과목 1:1 화상 과외를 제공합니다.</p>
+    <div class="link-list">${subjectLinks}</div>
+  </div>
+</section>
+
+${allGus.length ? `<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">AREAS</span>
+    <h2 class="sec-title">${sido} <em>시군구별 과외</em></h2>
+    <p class="sec-desc">원하시는 지역을 선택하시면 해당 시군구 전문 선생님을 안내해드립니다.</p>
+    <div class="card-grid">${allGuCards}</div>
+  </div>
+</section>` : ''}
+
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">PROCESS</span>
+    <h2 class="sec-title">딱 <em>4단계</em>로 시작하세요</h2>
+    <p class="sec-desc">복잡한 절차 없이 빠르고 간편하게 전문 선생님을 만나보세요.</p>
+    <div class="process-grid">
+      <div class="process-step"><div class="process-circle">1</div><h3>무료 상담 신청</h3><p>이름·연락처·학년·과목을 입력하고 무료 상담을 신청합니다.</p></div>
+      <div class="process-step"><div class="process-circle">2</div><h3>선생님 매칭</h3><p>24시간 내 ${sido} 지역 ${subject || ''}전문 선생님을 개인 맞춤 연결합니다.</p></div>
+      <div class="process-step"><div class="process-circle">3</div><h3>첫 30분 무료 체험</h3><p>첫 30분은 무료 체험입니다. 화상으로 수업 방식을 직접 체험해보세요.</p></div>
+      <div class="process-step"><div class="process-circle">4</div><h3>정기 수업 시작</h3><p>주 1~5회 맞춤 일정으로 체계적인 화상 1:1 수업을 시작합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+${buildLearningSection(grade, subject, sido)}
+
+${buildSubjectStudySection(subject, sido)}
+
+${buildExamGuideSection(sido)}
+
+${priceTableHtml(sido, subject, gus.length > 0)}
+
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">${sido} 학부모 <em>실제 후기</em></h2>
+    <p class="sec-desc">${sido}에서 드림과외 화상수업을 경험한 학부모님의 실제 이야기입니다.</p>
+    <div class="review-grid">
+      ${reviews.map(r => `<div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">${r.text}</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
+          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+${ctaBox(keyword)}
+${faqSection(faqs, faqSchema)}
+
+${consultForm({
+  leftTitle: `<em>지금 바로</em> 무료 상담<br>신청하세요`,
+  leftDesc: `${sido} 지역 전문 선생님을<br>24시간 내 연결해드립니다.`,
+  leftPts: [
+    '상담 후 24시간 내 선생님 매칭',
+    '첫 30분 무료 체험',
+    '전문 선생님 1:1 맞춤 연결',
+    '맞춤 커리큘럼 제공',
+  ],
+  regionValue: sido,
+})}`;
+
+  return layout({ head, body, breadcrumb: [{ label: keyword }], keyword, region: sido });
+}
+
+// ── 학교 레벨 페이지 ──────────────────────────────────────
+export function renderSchoolPage({ schoolName, dong, gu, sido, grade, subject }) {
+  const shortName   = schoolName.replace(/학교$/, '');
+  const displayDong = stripSuffix(dong);
+  const displayGu   = stripGuSuffix(gu);
+  const schoolType  = schoolName.includes('중학교') ? '중학교'
+    : schoolName.includes('고등학교') ? '고등학교'
+    : schoolName.includes('초등학교') ? '초등학교' : '학교';
+  const inferGrade  = schoolType === '중학교' ? '중등'
+    : schoolType === '고등학교' ? '고등'
+    : schoolType === '초등학교' ? '초등' : null;
+  const isVisit = Object.values(VISIT_REGIONS)
+    .flatMap(g => Object.values(g).flat()).includes(dong);
+  const subjectInfo  = subject ? SUBJECTS[subject] : null;
+  const subjectEmoji = subjectInfo ? subjectInfo.emoji : '📚';
+  const visitText    = isVisit ? '방문·화상 모두 가능' : '화상과외 가능';
+
+  const keyword    = `${shortName}${subject || ''}과외`;
+  const title      = `${schoolName} 과외 | 내신 대비 1:1 드림과외`;
+  const description = `${schoolName} 학생 전문 1:1 과외. ${displayGu} ${displayDong} 위치. 학교 교과서·내신 기출 중심 수업, 수행평가 대비. ${visitText}. 검증된 선생님 24시간 내 매칭.`;
+  const url        = `/${encodeURIComponent(schoolName + (subject || '') + '과외')}`;
+  const head       = buildHead({ title, description, url, type: isVisit ? 'local' : 'online' });
+
+  const faqs = buildFAQSchema([
+    {
+      q: `${schoolName} 내신 대비 과외가 가능한가요?`,
+      a: `드림과외 선생님들은 ${schoolName} 시험 출제 경향과 교과서 범위를 파악하고 있습니다. 단원별 핵심 개념 정리, 기출 유형 풀이, 서술형·수행평가 대비까지 학교 일정에 맞춰 커리큘럼을 구성합니다.`,
+    },
+    {
+      q: `방문과외와 화상과외 중 어떤 것이 가능한가요?`,
+      a: isVisit
+        ? `${displayDong} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업과 집에서 편하게 받는 화상 수업 중 선택하실 수 있습니다.`
+        : `${displayDong} 지역은 화상과외로 진행됩니다. 이동 시간 없이 집에서 전문 선생님과 1:1 수업이 가능합니다.`,
+    },
+    {
+      q: `선생님 매칭은 얼마나 걸리나요?`,
+      a: `상담 신청 후 24시간 이내에 최적의 선생님을 연결해드립니다. 시험이 임박한 경우 빠른 매칭이 가능하도록 안내해드립니다.`,
+    },
+    {
+      q: `첫 수업이 무료인가요?`,
+      a: `첫 30분은 무료 체험입니다. 선생님의 수업 방식과 학생과의 궁합을 직접 확인하신 후 결정하실 수 있습니다.`,
+    },
+    {
+      q: `수업 일정은 어떻게 조율하나요?`,
+      a: `주 1~5회, 학생과 학부모님의 일정에 맞춰 유연하게 조정합니다. 시험 기간에는 단기 집중 수업 일정도 조율 가능합니다.`,
+    },
+  ]);
+  const faqSectionHtml = buildFAQSchema([]);  // schema only — section built below
+
+  const reviews  = buildReviews(displayDong, subject);
+  const faqItems = [
+    {
+      q: `${schoolName} 내신 대비 과외가 가능한가요?`,
+      a: `드림과외 선생님들은 ${schoolName} 시험 출제 경향과 교과서 범위를 파악하고 있습니다. 단원별 핵심 개념 정리, 기출 유형 풀이, 서술형·수행평가 대비까지 학교 일정에 맞춰 커리큘럼을 구성합니다.`,
+    },
+    {
+      q: `방문과외와 화상과외 중 어떤 것이 가능한가요?`,
+      a: isVisit
+        ? `${displayDong} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업과 집에서 편하게 받는 화상 수업 중 선택하실 수 있습니다.`
+        : `${displayDong} 지역은 화상과외로 진행됩니다. 이동 시간 없이 집에서 전문 선생님과 1:1 수업이 가능합니다.`,
+    },
+    {
+      q: `선생님 매칭은 얼마나 걸리나요?`,
+      a: `상담 신청 후 24시간 이내에 최적의 선생님을 연결해드립니다. 시험이 임박한 경우 빠른 매칭이 가능하도록 안내해드립니다.`,
+    },
+    {
+      q: `첫 수업이 무료인가요?`,
+      a: `첫 30분은 무료 체험입니다. 선생님의 수업 방식과 학생과의 궁합을 직접 확인하신 후 결정하실 수 있습니다.`,
+    },
+    {
+      q: `수업 일정은 어떻게 조율하나요?`,
+      a: `주 1~5회, 학생과 학부모님의 일정에 맞춰 유연하게 조정합니다. 시험 기간에는 단기 집중 수업 일정도 조율 가능합니다.`,
+    },
+  ];
+  const faqSchema = buildFAQSchema(faqItems);
+
+  // 과목별 링크
+  const subjectLinks = Object.entries(SUBJECTS).map(([s, info]) =>
+    `<a href="/${encodeURIComponent(shortName + s + '과외')}">${info.emoji} ${shortName} ${s}과외</a>`
+  ).join('');
+
+  // 관련 링크 (학교 → 동, 구)
+  const relatedLinks = [
+    `<a href="/${encodeURIComponent(displayDong + '과외')}">📍 ${displayDong} 과외 전체</a>`,
+    ...Object.entries(SUBJECTS).map(([s]) =>
+      `<a href="/${encodeURIComponent(displayDong + s + '과외')}">${displayDong} ${s}과외</a>`
+    ),
+    `<a href="/${encodeURIComponent(displayGu + '과외')}">${displayGu} 과외 전체</a>`,
+  ].join('');
+
+  const breadcrumb = [
+    { label: sido },
+    { label: gu, url: `/${encodeURIComponent(displayGu + '과외')}` },
+    { label: dong, url: `/${encodeURIComponent(displayDong + '과외')}` },
+    { label: keyword },
+  ];
+
+  const body = `
+<!-- HERO -->
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">🏫 ${sido} · ${gu} · ${displayDong}</div>
+    <h1 class="page-h1">${schoolName}<em>${subject ? ' ' + subject : ''}과외</em></h1>
+    <p class="page-desc">
+      ${displayGu}에 위치한 ${schoolName} 학생을 위한 1:1 전문 과외입니다.
+      학교 교과서와 내신 기출 문제를 중심으로 수업을 구성하며,
+      서술형·수행평가 대비도 함께 진행합니다.
+      ${isVisit ? '방문과외·화상과외 모두 가능하며,' : '화상과외로 진행되며,'}
+      상담 신청 후 24시간 내에 선생님을 매칭해드립니다.
+      첫 30분을 무료로 체험하실 수 있습니다.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      ${isVisit ? '<span class="hero-chip">🏠 방문과외</span>' : ''}
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">📋 내신 전문</span>
+      <span class="hero-chip">${subjectEmoji} ${subject || '전 과목'}</span>
+    </div>
+  </div>
+</section>
+
+<!-- 학교 정보 -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">SCHOOL INFO</span>
+    <h2 class="sec-title">${schoolName} <em>기본 정보</em></h2>
+    <div class="str-grid">
+      <div class="str-card">
+        <span class="str-icon">🏫</span>
+        <h3>학교 종류</h3>
+        <p>${schoolType} | ${sido} ${gu} ${dong} 소재</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">${isVisit ? '🏠' : '💻'}</span>
+        <h3>수업 방식</h3>
+        <p>${isVisit ? '방문과외 · 화상과외 모두 가능합니다.' : '화상과외로 진행됩니다. 이동 없이 집에서 편리하게 받을 수 있습니다.'}</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">📋</span>
+        <h3>내신 대비</h3>
+        <p>${schoolName} 교과서 기반 내신 대비, 단원별 핵심 개념 정리, 기출 유형 분석을 진행합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">✏️</span>
+        <h3>수행평가</h3>
+        <p>서술형 답안 작성, 수행평가 주제 준비, 발표 자료 구성 등을 함께 지도합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 과목별 과외 -->
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">SUBJECTS</span>
+    <h2 class="sec-title">${shortName} <em>과목별 과외</em></h2>
+    <p class="sec-desc">수학·영어·국어·과학·사회·한국사 전 과목 1:1 맞춤 과외를 제공합니다.</p>
+    <div class="link-list">${subjectLinks}</div>
+  </div>
+</section>
+
+<!-- 왜 드림과외 -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">WHY DREAMTUTOR</span>
+    <h2 class="sec-title">${shortName}에서 <em>드림과외</em>를 선택하는 이유</h2>
+    <p class="sec-desc">
+      드림과외 선생님은 ${schoolName} 학교의 내신 시험 출제 경향과 수업 방식을
+      파악하고 있습니다. 학생 개개인의 수준과 목표에 맞는 맞춤형 커리큘럼을 제공합니다.
+    </p>
+    <div class="str-grid">
+      <div class="str-card">
+        <span class="str-icon">🏆</span>
+        <div class="str-num">30<span>년+</span></div>
+        <h3>교육 노하우</h3>
+        <p>${displayDong} 지역 학생 지도 경험을 바탕으로 30년+ 교육 노하우로 맞춤 커리큘럼을 설계합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">👩‍🏫</span>
+        <div class="str-num">2,000<span>+</span></div>
+        <h3>전문 선생님</h3>
+        <p>${schoolType} 과목별 전문 선생님이 학생 수준에 맞는 1:1 수업을 진행합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">⚡</span>
+        <div class="str-num">24<span>h</span></div>
+        <h3>빠른 매칭</h3>
+        <p>상담 신청 후 24시간 이내 ${schoolName} 내신에 맞는 선생님을 연결합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">🎁</span>
+        <h3>첫 30분 무료 체험</h3>
+        <p>첫 30분을 무료로 체험하실 수 있습니다. 선생님과 궁합을 확인 후 결정하세요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+${buildLearningSection(inferGrade, subject, schoolName)}
+
+${buildSubjectStudySection(subject, shortName)}
+
+${buildExamGuideSection(schoolName)}
+
+<!-- 후기 -->
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">${displayDong} 학부모 <em>실제 후기</em></h2>
+    <p class="sec-desc">드림과외를 경험한 학생과 학부모님의 실제 후기입니다.</p>
+    <div class="review-grid">
+      ${reviews.map(r => `<div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">${r.text}</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
+          <div>
+            <div class="review-name">${r.name}</div>
+            <div class="review-info">${r.info}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+${ctaBox(keyword)}
+
+<!-- 관련 링크 (학교 → 동/구) -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">RELATED</span>
+    <h2 class="sec-title"><em>${displayDong}</em> 지역 과외 정보</h2>
+    <p class="sec-desc">${schoolName}이 위치한 ${displayDong} 지역의 다른 과외 정보를 확인하세요.</p>
+    <div class="link-list">${relatedLinks}</div>
+  </div>
+</section>
+
+${faqSection(faqItems, faqSchema)}
+
+${consultForm({
+  leftTitle: `<em>${shortName}</em> 학생<br>무료 상담 신청`,
+  leftDesc: `${displayDong} ${schoolName} 내신 전문 선생님을<br>24시간 내 연결해드립니다.`,
+  leftPts: [
+    `${schoolName} 내신 기출 파악 선생님`,
+    '상담 후 24시간 내 선생님 매칭',
+    '첫 30분 무료 체험',
+    '맞춤 커리큘럼 제공',
+  ],
+  regionValue: displayDong,
+})}`;
+
+  return layout({ head, body, breadcrumb, keyword, region: displayDong });
+}
+
+// ── 헬퍼: 학습 콘텐츠 섹션 생성 ─────────────────────────
+function buildLearningSection(grade, subject, location) {
+  // 과목별 공부 방법
+  const subjectMethod = {
+    수학: { title: '수학 과외 학습 방법', steps: ['개념 이해 → 유형 훈련 → 실전 문제 풀이', '오답 노트 작성으로 취약 유형 반복 보완', '학교 교과서 기반 내신 기출 집중 분석'] },
+    영어: { title: '영어 과외 학습 방법', steps: ['어휘 학습 → 독해 훈련 → 쓰기·말하기 적용', '교과서 본문 분석과 서술형 표현 정리', '수능 유형(빈칸·순서·주제) 반복 연습'] },
+    국어: { title: '국어 과외 학습 방법', steps: ['기초 문법 → 독해 전략 → 서술형 답안 작성', '문학 작품 분석과 현대어 풀이 훈련', '내신 기출 서술형과 수능 국어 유형 대비'] },
+    과학: { title: '과학 과외 학습 방법', steps: ['핵심 개념 이해 → 원리 적용 → 응용 문제 풀이', '물리·화학·생물·지구과학 단원별 체계적 학습', '수행평가·실험 보고서 작성 함께 대비'] },
+    사회: { title: '사회 과외 학습 방법', steps: ['개념 흐름 파악 → 사건·맥락 연결 → 암기 전략', '지리·역사·일반사회 단원 균형 있게 학습', '서술형 문제 대비 및 수행평가 답안 작성'] },
+    한국사: { title: '한국사 과외 학습 방법', steps: ['시대별 흐름 파악 → 주요 사건·인물 암기', '내신 서술형과 한국사능력검정시험 동시 대비', '연표 정리와 오답 반복으로 장기 기억 강화'] },
+  };
+
+  const sm = subject ? subjectMethod[subject] : null;
+  const subjectBlock = sm ? `
+    <div class="learning-method">
+      <h3>${sm.title}</h3>
+      <ul>
+        ${sm.steps.map(s => `<li>${s}</li>`).join('')}
+      </ul>
+    </div>` : '';
+
+  // 학년별 학습 콘텐츠
+  if (grade === '초등') {
+    return `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">LEARNING GUIDE</span>
+    <h2 class="sec-title">${location} 초등 과외 <em>학습 가이드</em></h2>
+    <p class="sec-desc">
+      초등 시기는 학습 습관과 기초 학력의 토대를 만드는 중요한 단계입니다.
+      드림과외는 아이의 흥미를 살리면서 자기주도학습 능력을 함께 키워드립니다.
+    </p>
+    <div class="learning-grid">
+      <div class="learning-card">
+        <span class="learning-icon">📖</span>
+        <h3>기초 학력 강화</h3>
+        <p>학교 교과서 중심으로 개념을 탄탄하게 다집니다. 모르는 부분을 바로잡아 학교 수업에 자신감을 갖게 해드립니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">🌱</span>
+        <h3>자기주도학습 습관</h3>
+        <p>스스로 예습·복습하는 습관을 형성합니다. 숙제 관리와 공부 루틴을 선생님과 함께 잡아드립니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">✏️</span>
+        <h3>수행평가 대비</h3>
+        <p>학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">😊</span>
+        <h3>과목별 흥미 유발</h3>
+        <p>눈높이에 맞는 설명으로 과목에 흥미와 자신감을 갖게 해드립니다. 싫어하는 과목도 재미있게 접근합니다.</p>
+      </div>
+    </div>
+    ${subjectBlock}
+  </div>
+</section>`;
+  }
+
+  if (grade === '중등') {
+    return `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">LEARNING GUIDE</span>
+    <h2 class="sec-title">${location} 중등 과외 <em>학습 가이드</em></h2>
+    <p class="sec-desc">
+      중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다.
+      드림과외는 ${location} 학교별 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.
+    </p>
+    <div class="learning-grid">
+      <div class="learning-card">
+        <span class="learning-icon">📝</span>
+        <h3>내신 집중 대비</h3>
+        <p>학교별 기출 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">📋</span>
+        <h3>수행평가 관리</h3>
+        <p>서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">📚</span>
+        <h3>공부 방법 코칭</h3>
+        <p>과목별 효과적인 공부 방법을 알려드립니다. 오답 노트 활용과 복습 루틴을 함께 만들어드립니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">🎯</span>
+        <h3>자기주도학습</h3>
+        <p>선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.</p>
+      </div>
+    </div>
+    ${subjectBlock}
+  </div>
+</section>`;
+  }
+
+  if (grade === '고등') {
+    return `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">LEARNING GUIDE</span>
+    <h2 class="sec-title">${location} 고등 과외 <em>학습 가이드</em></h2>
+    <p class="sec-desc">
+      고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다.
+      드림과외는 ${location} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.
+    </p>
+    <div class="learning-grid">
+      <div class="learning-card">
+        <span class="learning-icon">🏫</span>
+        <h3>내신 + 수능 동시 대비</h3>
+        <p>학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">🗂️</span>
+        <h3>학생부 · 수행평가 관리</h3>
+        <p>학생부 기재 사항을 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 지도합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">🎓</span>
+        <h3>입시 전략 안내</h3>
+        <p>수시·정시 비중과 목표 대학에 맞는 학습 전략을 안내합니다. 진로에 따른 과목 선택도 함께 상담합니다.</p>
+      </div>
+      <div class="learning-card">
+        <span class="learning-icon">📊</span>
+        <h3>과목별 공부 방법</h3>
+        <p>수능 연계 교재 활용법, 모의고사 분석, 오답 정리까지 체계적인 학습 방법을 함께 만들어갑니다.</p>
+      </div>
+    </div>
+    ${subjectBlock}
+  </div>
+</section>`;
+  }
+
+  // 학년 미지정: 초등·중등·고등 전 학년 가이드 모두 표시
+  return `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">LEARNING GUIDE</span>
+    <h2 class="sec-title">${location} 과외 <em>학년별 학습 가이드</em></h2>
+    <p class="sec-desc">
+      드림과외는 초등부터 고등까지 학년별 특성에 맞는 1:1 맞춤 학습을 제공합니다.
+      ${location} 학생의 현재 수준과 목표에 따라 최적의 커리큘럼을 구성합니다.
+    </p>
+
+    <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">🌱 초등 과외 — 기초와 학습 습관 형성</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">초등 시기는 학습 습관과 기초 학력의 토대를 만드는 중요한 단계입니다. 드림과외는 아이의 흥미를 살리면서 자기주도학습 능력을 함께 키워드립니다.</p>
+    <div class="learning-grid" style="margin-bottom:32px">
+      <div class="learning-card"><span class="learning-icon">📖</span><h3>기초 학력 강화</h3><p>학교 교과서 중심으로 개념을 탄탄하게 다집니다. 모르는 부분을 즉시 바로잡아 학교 수업에 자신감을 갖게 해드립니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">🌱</span><h3>학습 습관 형성</h3><p>스스로 예습·복습하는 루틴을 만들어드립니다. 숙제 관리와 계획 세우기를 선생님과 함께 연습합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">✏️</span><h3>수행평가 대비</h3><p>학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">😊</span><h3>과목 흥미 유발</h3><p>눈높이에 맞는 설명으로 과목에 흥미와 자신감을 심어드립니다. 싫어하는 과목도 재미있게 접근합니다.</p></div>
+    </div>
+
+    <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">📝 중등 과외 — 내신과 수행평가 집중 관리</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다. 드림과외는 ${location} 학교별 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.</p>
+    <div class="learning-grid" style="margin-bottom:32px">
+      <div class="learning-card"><span class="learning-icon">📝</span><h3>내신 집중 대비</h3><p>학교별 기출 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">📋</span><h3>수행평가 관리</h3><p>서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">📚</span><h3>공부 방법 코칭</h3><p>과목별 효과적인 공부 방법을 알려드립니다. 오답 노트 활용과 복습 루틴을 함께 만들어드립니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">🎯</span><h3>자기주도학습</h3><p>선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.</p></div>
+    </div>
+
+    <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">🎓 고등 과외 — 내신·수능 동시 대비</h3>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다. 드림과외는 ${location} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.</p>
+    <div class="learning-grid">
+      <div class="learning-card"><span class="learning-icon">🏫</span><h3>내신 + 수능 병행</h3><p>학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">🗂️</span><h3>학생부·수행평가 관리</h3><p>학생부 기재 사항을 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 지도합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">🎓</span><h3>입시 전략 안내</h3><p>수시·정시 비중과 목표 대학에 맞는 학습 전략을 안내합니다. 진로에 따른 과목 선택도 상담합니다.</p></div>
+      <div class="learning-card"><span class="learning-icon">📊</span><h3>모의고사 분석</h3><p>수능 연계 교재 활용법, 모의고사 결과 분석, 취약 단원 집중 보완까지 체계적으로 관리합니다.</p></div>
+    </div>
+    ${subjectBlock}
+  </div>
+</section>`;
+}
+
+// ── 헬퍼: 과목별 상세 학습법 섹션 ────────────────────────
+function buildSubjectStudySection(subject, location) {
+  const methods = {
+    수학: {
+      intro: `수학은 개념 이해 없이 문제 풀이만 반복하면 실력이 쌓이지 않습니다. ${location} 드림과외 수학 선생님은 원리를 완전히 이해한 뒤 유형 훈련으로 연결하는 방식으로 지도합니다.`,
+      items: [
+        { icon: '📐', title: '개념 완전 이해', desc: '공식 암기가 아닌 원리 이해 중심 수업입니다. 왜 그런지 이해해야 응용 문제도 풀 수 있습니다.' },
+        { icon: '📝', title: '유형별 반복 훈련', desc: '내신 출제 유형을 분류하고 각 유형을 반복 훈련합니다. 실수 없는 안정적인 점수 확보가 목표입니다.' },
+        { icon: '🎯', title: '오답 노트 관리', desc: '틀린 문제를 체계적으로 정리하고 반복 복습합니다. 같은 실수를 두 번 하지 않는 습관을 만듭니다.' },
+        { icon: '📊', title: '수능 연계 대비', desc: '내신 학습이 수능 수학으로 자연스럽게 이어지도록 커리큘럼을 구성합니다.' },
+      ],
+    },
+    영어: {
+      intro: `영어는 단기간에 올리기 어렵지만, 올바른 방법으로 꾸준히 하면 점수가 반드시 오릅니다. ${location} 드림과외 영어 선생님은 어휘·독해·서술형을 균형 있게 지도합니다.`,
+      items: [
+        { icon: '📖', title: '어휘·문법 기초', desc: '교과서 핵심 어휘와 문법 사항을 정리합니다. 기초가 튼튼해야 독해와 서술형이 수월해집니다.' },
+        { icon: '🔍', title: '독해 전략 훈련', desc: '문단 구조 파악, 주제·요지 찾기, 빈칸 추론 등 수능 독해 유형별 접근법을 익힙니다.' },
+        { icon: '✍️', title: '서술형 표현 정리', desc: '내신 서술형에 자주 등장하는 표현과 문형을 정리하고 반복 연습합니다.' },
+        { icon: '🎙️', title: '말하기·수행평가', desc: '수행평가 말하기·발표 준비를 함께 진행하며 영어에 대한 자신감을 키웁니다.' },
+      ],
+    },
+    국어: {
+      intro: `국어는 단순히 글을 읽는 과목이 아닙니다. ${location} 드림과외 국어 선생님은 독해 전략, 문학 분석, 서술형 답안 작성을 체계적으로 지도합니다.`,
+      items: [
+        { icon: '📚', title: '문학 작품 분석', desc: '소설·시·수필의 주제, 표현 방식, 서술자 시점 등 내신 출제 포인트를 집중 정리합니다.' },
+        { icon: '📄', title: '비문학 독해 전략', desc: '지문 구조 파악과 핵심 정보 추출 능력을 훈련합니다. 수능 비문학 유형도 함께 다룹니다.' },
+        { icon: '✏️', title: '서술형 답안 작성', desc: '내신 서술형에서 감점을 줄이는 답안 작성법을 훈련합니다. 조건 확인·핵심어 포함 방법을 익힙니다.' },
+        { icon: '🔡', title: '문법 체계 정리', desc: '음운·형태·통사론 등 국어 문법을 체계적으로 정리합니다. 헷갈리는 개념을 확실히 잡아드립니다.' },
+      ],
+    },
+    과학: {
+      intro: `과학은 개념과 원리를 이해한 뒤 실험·적용까지 연결해야 내신에서 좋은 점수를 받을 수 있습니다. ${location} 드림과외 과학 선생님은 물리·화학·생물·지구과학 전 분야를 지도합니다.`,
+      items: [
+        { icon: '⚗️', title: '핵심 개념 이해', desc: '암기보다 원리 이해 중심으로 개념을 잡습니다. 개념이 잡혀야 응용 문제도 풀 수 있습니다.' },
+        { icon: '🔬', title: '실험·수행평가 대비', desc: '실험 보고서 작성법, 결론 도출 방법을 함께 준비합니다. 수행평가 배점이 큰 만큼 철저히 대비합니다.' },
+        { icon: '📐', title: '계산 문제 훈련', desc: '물리·화학의 계산 문제를 단계적으로 풀이하는 훈련을 합니다. 공식 적용 순서를 체계화합니다.' },
+        { icon: '🧬', title: '단원별 집중 관리', desc: '물리·화학·생물·지구과학 각 단원의 출제 비중을 파악하고 효율적으로 학습합니다.' },
+      ],
+    },
+    사회: {
+      intro: `사회는 방대한 내용을 체계적으로 정리하지 않으면 시험에서 실수가 잦습니다. ${location} 드림과외 사회 선생님은 개념 흐름 파악과 서술형 대비에 집중합니다.`,
+      items: [
+        { icon: '🗺️', title: '개념 흐름 파악', desc: '단순 암기가 아닌 내용 간의 연결 관계를 파악합니다. 원인·결과 관계를 이해하면 기억에 오래 남습니다.' },
+        { icon: '📰', title: '시사·현안 연계', desc: '교과 내용과 실제 사회 현상을 연결해 이해합니다. 수행평가 논술에도 도움이 됩니다.' },
+        { icon: '✏️', title: '서술형 답안 작성', desc: '사회 서술형은 핵심어를 포함한 완결된 문장이 중요합니다. 감점 없는 답안 작성을 반복 훈련합니다.' },
+        { icon: '📋', title: '수행평가 프로젝트', desc: '발표, 보고서, 포트폴리오 등 다양한 수행평가 형식을 함께 준비합니다.' },
+      ],
+    },
+    한국사: {
+      intro: `한국사는 시대별 흐름을 이해하지 않으면 내신과 수능 모두 어렵습니다. ${location} 드림과외 한국사 선생님은 연표 정리와 핵심 사건 중심으로 체계적으로 지도합니다.`,
+      items: [
+        { icon: '⏳', title: '시대별 흐름 파악', desc: '선사시대부터 현대까지 시대별 핵심 사건과 흐름을 연표로 정리합니다. 전체 그림을 먼저 그립니다.' },
+        { icon: '📌', title: '핵심 사건·인물 암기', desc: '시험에 자주 나오는 사건, 인물, 제도를 효율적으로 암기하는 전략을 제공합니다.' },
+        { icon: '✍️', title: '내신 서술형 대비', desc: '학교별 서술형 출제 경향에 맞춰 답안 작성을 반복 훈련합니다. 조건 충족과 핵심어 포함이 핵심입니다.' },
+        { icon: '🎯', title: '한국사능력검정 병행', desc: '내신 한국사와 한국사능력검정시험을 동시에 대비하는 효율적인 학습 계획을 제공합니다.' },
+      ],
+    },
+  };
+  const m = subject ? methods[subject] : null;
+  if (!m) return '';
+  return `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">STUDY METHOD</span>
+    <h2 class="sec-title">${location} <em>${subject} 과외</em> 학습 방법</h2>
+    <p class="sec-desc">${m.intro}</p>
+    <div class="str-grid">
+      ${m.items.map(item => `<div class="str-card">
+        <span class="str-icon">${item.icon}</span>
+        <h3>${item.title}</h3>
+        <p>${item.desc}</p>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
+}
+
+// ── 헬퍼: 내신·수능·수행평가 가이드 섹션 ───────────────────
+function buildExamGuideSection(location) {
+  return `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">EXAM GUIDE</span>
+    <h2 class="sec-title">${location} <em>내신·수능·수행평가</em> 완벽 대비</h2>
+    <p class="sec-desc">
+      드림과외는 정기고사, 수행평가, 수능까지 학생의 모든 시험을 함께 준비합니다.
+      ${location} 학교 일정에 맞춰 체계적인 학습 계획을 수립합니다.
+    </p>
+    <div class="str-grid">
+      <div class="str-card">
+        <span class="str-icon">📋</span>
+        <h3>내신 기출 분석</h3>
+        <p>${location} 인근 학교의 기출 문제 유형과 출제 경향을 파악하고 단원별 핵심 문제를 집중적으로 다룹니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">✏️</span>
+        <h3>수행평가 완벽 준비</h3>
+        <p>서술형·논술형 답안 작성법, 발표 준비, 실험 보고서 작성까지 수행평가의 모든 유형을 함께 대비합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">🎯</span>
+        <h3>수능 연계 학습</h3>
+        <p>내신과 수능이 겹치는 범위를 효율적으로 학습합니다. 수능 기출 유형 분석과 취약 영역 집중 보완을 진행합니다.</p>
+      </div>
+      <div class="str-card">
+        <span class="str-icon">📅</span>
+        <h3>시험 일정 관리</h3>
+        <p>중간·기말고사, 수행평가, 모의고사 일정을 고려한 월별·주별 학습 계획을 선생님과 함께 수립합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
+// ── 헬퍼: 학부모 후기 생성 ────────────────────────────
+function buildReviews(location, subject) {
+  const s = subject || '수학';
+  return [
+    {
+      avatar: '김', color: '#2563EB',
+      name: '김○○ 학생 어머니',
+      info: `${location} · 중학교 3학년 · ${s}`,
+      text: `${location}에서 드림과외 ${s} 선생님을 만났는데, 3개월 만에 내신 점수가 확 올랐어요! 학교 기출 경향을 너무 정확히 파악하고 계셔서 시험 대비에 정말 효과적이었습니다. 무엇보다 아이가 선생님을 너무 잘 따르고 수업을 기다리게 됐어요. 처음 체험 수업이 무료여서 부담 없이 시작할 수 있었던 것도 너무 좋았습니다.`,
+    },
+    {
+      avatar: '박', color: '#F59E0B',
+      name: '박○○ 학생',
+      info: `${location} · 고등학교 2학년 · ${s}`,
+      text: `${s} 성적이 많이 올랐어요! 교과서 본문과 서술형 유형을 꼼꼼하게 짚어주신 덕분에 시험 준비가 훨씬 수월했습니다. 학교 시험 유형과 출제 경향을 잘 파악하고 계셔서 효과적이었어요. 선생님 매칭도 하루 만에 돼서 시험 직전에도 빠르게 시작할 수 있었어요.`,
+    },
+    {
+      avatar: '이', color: '#10B981',
+      name: '이○○ 학생 어머니',
+      info: `${location} · 초등학교 5학년 · ${s}`,
+      text: `초등학생인데도 선생님이 눈높이에 딱 맞게 쉽고 재미있게 설명해 주셔서 아이가 ${s}에 흥미를 갖게 됐어요. ${location} 방문 과외라 이동할 필요가 없어서 너무 편하고 좋았습니다. 진도 관리도 꼼꼼히 해주셔서 학교 수업 따라가는 데 자신감이 생겼어요. 강력히 추천합니다!`,
+    },
+  ];
+}
+
+// ── 헬퍼: FAQ 5개 생성 ────────────────────────────────
+function buildFAQs({ dong, gu, grade, subject, isVisit }) {
+  const s = subject || '과외';
+  const g = grade || '';
+  const gradeQ = grade === '초등' ? '초등학생도 1:1 과외 효과가 있나요?'
+    : grade === '중등' ? `${dong} ${g} 내신 대비는 어떻게 진행되나요?`
+    : grade === '고등' ? `${dong} ${g} 내신과 수능 동시 대비가 가능한가요?`
+    : `${dong} 학교 내신 대비도 가능한가요?`;
+  const gradeA = grade === '초등'
+    ? `네, 초등학생은 학습 습관 형성이 중요한 시기입니다. 드림과외 선생님은 눈높이에 맞는 설명으로 과목별 흥미를 유발하고, 자기주도학습 습관을 함께 잡아드립니다. 수행평가 대비도 함께 진행합니다.`
+    : grade === '중등'
+    ? `중학교 내신은 지필고사와 수행평가가 모두 중요합니다. 드림과외 선생님은 ${dong} 인근 학교의 출제 경향을 숙지하고, 단원별 핵심 개념과 서술형 문제 대비 커리큘럼을 제공합니다.`
+    : grade === '고등'
+    ? `고등학교 시기에는 내신과 수능을 동시에 대비해야 합니다. 드림과외 선생님은 ${dong} 인근 학교 내신 기출 분석과 함께 수능 연계 학습을 병행하며, 학생부 관리와 입시 전략도 안내해드립니다.`
+    : `드림과외 선생님들은 ${dong} 인근 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학생 학교와 학년에 맞춘 내신 대비 커리큘럼을 제공하며, 서술형·수행평가 대비도 함께 진행합니다.`;
+  return [
+    {
+      q: `${dong} 방문과외도 가능한가요?`,
+      a: isVisit
+        ? `네, ${dong}은 방문과외 서비스 지역입니다. 학생 자택으로 직접 방문하는 1:1 수업을 제공합니다. 화상과외도 함께 선택 가능하며, 상황에 맞게 유연하게 변경할 수 있습니다.`
+        : `${dong} 지역은 화상과외로 진행됩니다. 집에서 편리하게 전국 최고 수준의 선생님과 1:1 수업이 가능하며, 이동 시간을 절약해 더 많은 시간을 학습에 집중할 수 있습니다.`,
+    },
+    {
+      q: gradeQ,
+      a: gradeA,
+    },
+    {
+      q: `${g}${subject ? subject + ' ' : ''}선생님은 어떻게 검증되나요?`,
+      a: `드림과외는 30년+ 교육 노하우를 바탕으로 학력·경력·수업 능력을 종합적으로 평가한 전문 선생님을 연결합니다. 수강생 피드백을 지속적으로 관리하며 수업 품질을 유지합니다.`,
+    },
+    {
+      q: `수업 일정이나 교재는 어떻게 정하나요?`,
+      a: `수업 일정은 학생·학부모님과 상의해 주 1~5회 유연하게 조정합니다. 교재는 선생님이 학생의 학교 교과서와 수준에 맞춰 추천해드리며, 학교 교과서 위주 수업도 가능합니다.`,
+    },
+    {
+      q: `첫 수업이 정말 무료인가요?`,
+      a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식, 학생과의 궁합, 커리큘럼 방향을 직접 체험한 후 결정하실 수 있습니다.`,
+    },
+  ];
+}
+
+// ── 헬퍼: 관련 링크 생성 ────────────────────────────────
+function buildDongRelatedLinks({ dong, displayDong, gu, grade, subject, nearSchoolName }) {
+  const links = [];
+  const guDisplay = stripGuSuffix(gu);
+
+  if (!grade && !subject) {
+    for (const s of Object.keys(SUBJECTS)) {
+      links.push(`<a href="/${encodeURIComponent(displayDong + s + '과외')}">${displayDong} ${s}과외</a>`);
+    }
+    for (const g of Object.keys(GRADES)) {
+      links.push(`<a href="/${encodeURIComponent(displayDong + g + '과외')}">${displayDong} ${g}과외</a>`);
+    }
+  } else if (grade && !subject) {
+    for (const s of Object.keys(SUBJECTS)) {
+      links.push(`<a href="/${encodeURIComponent(displayDong + grade + s + '과외')}">${displayDong} ${grade} ${s}과외</a>`);
+    }
+    links.push(`<a href="/${encodeURIComponent(displayDong + '과외')}">${displayDong} 과외 전체</a>`);
+  } else if (!grade && subject) {
+    for (const g of Object.keys(GRADES)) {
+      links.push(`<a href="/${encodeURIComponent(displayDong + g + subject + '과외')}">${displayDong} ${g} ${subject}과외</a>`);
+    }
+    links.push(`<a href="/${encodeURIComponent(displayDong + '과외')}">${displayDong} 과외 전체</a>`);
+  } else {
+    links.push(`<a href="/${encodeURIComponent(displayDong + subject + '과외')}">${displayDong} ${subject}과외</a>`);
+    links.push(`<a href="/${encodeURIComponent(displayDong + grade + '과외')}">${displayDong} ${grade}과외</a>`);
+    links.push(`<a href="/${encodeURIComponent(displayDong + '과외')}">${displayDong} 과외 전체</a>`);
+  }
+
+  links.push(`<a href="/${encodeURIComponent(guDisplay + '과외')}">${guDisplay} 과외 전체보기</a>`);
+
+  // 역방향 링크: 동 → 해당 학교 과외 페이지
+  if (nearSchoolName) {
+    const shortSchool = nearSchoolName.replace(/학교$/, '');
+    const schoolSlug  = subject
+      ? `${nearSchoolName}${subject}과외`
+      : `${nearSchoolName}과외`;
+    links.push(`<a href="/${encodeURIComponent(schoolSlug)}">🏫 ${shortSchool} 내신 과외</a>`);
+  }
+
+  return links.join('');
+}
+
+// ── 헬퍼: 과목 이모지 ────────────────────────────────
+function subjectEmoji(info) {
+  return info?.emoji || '📚';
+}
+
+// ── 화상과외 페이지 렌더러 ────────────────────────────
+export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject }) {
+  const subjectInfo = subject ? SUBJECTS[subject] : null;
+  const gradeInfo   = grade   ? GRADES[grade]     : null;
+
+  // 표시용 지역명
+  let displayName, pageTitle, pageDesc;
+  // 방문과외 가능 여부 판단
+  let isVisit = false;
+  if (level === 'dong' && dong) {
+    isVisit = !!(VISIT_REGIONS[sido]?.[sigungu]?.includes(dong));
+  } else if (level === 'sigungu' && sigungu) {
+    isVisit = !!(VISIT_REGIONS[sido]?.[sigungu]?.length);
+  } else if (level === 'sido') {
+    isVisit = !!(VISIT_REGIONS[sido] && Object.keys(VISIT_REGIONS[sido]).length > 0);
+  }
+
+  const serviceText = isVisit ? '방문·화상과외' : '화상과외';
+
+  if (level === 'dong') {
+    displayName = dong;
+    pageTitle   = `${dong}${grade || ''}${subject || ''}과외`;
+    pageDesc    = `${dong} ${serviceText} 전문 선생님 연결. 1:1 맞춤 수업, 첫 30분 무료 체험.`;
+  } else if (level === 'sigungu') {
+    displayName = sigungu;
+    pageTitle   = `${sigungu}${grade || ''}${subject || ''}과외`;
+    pageDesc    = `${sigungu} ${serviceText} 전문 선생님 연결. 1:1 맞춤 수업으로 성적 향상, 첫 30분 무료 체험.`;
+  } else {
+    displayName = sido;
+    pageTitle   = `${sido}${grade || ''}${subject || ''}과외`;
+    pageDesc    = `${sido} ${serviceText} 전문 선생님 연결. 전 과목 1:1 맞춤 수업, 첫 30분 무료 체험.`;
+  }
+
+  const keyword = pageTitle;
+  const subjectLabel = subject || '전 과목';
+  const gradeLabel   = grade   || '전 학년';
+
+  const head = buildHead({
+    title:       `${pageTitle} | 드림과외`,
+    description: pageDesc,
+    canonical:   `/${encodeURIComponent(keyword)}`,
+    keywords:    `${displayName} 과외, ${displayName} 화상과외, ${displayName} 온라인과외, ${subjectLabel} 과외`,
+  });
+
+  // WHY 섹션
+  const onlineFeatures = `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">WHY DREAMTUTOR</span>
+    <h2 class="sec-title">${displayName} <em>드림과외</em> 특징</h2>
+    <p class="sec-desc">이동 없이 집에서 전국 최고 수준의 선생님과 1:1 맞춤 수업을 받으세요.</p>
+    <div class="str-grid">
+      <div class="str-card"><span class="str-icon">🏆</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>30년+ 교육 현장 경험으로 과목별 최적 커리큘럼 제공. 수능부터 내신까지 체계적 관리.</p></div>
+      <div class="str-card"><span class="str-icon">👥</span><div class="str-num">100<span>만+</span></div><h3>누적 회원수</h3><p>전국 100만 명 이상의 학생과 학부모가 드림과외와 함께한 교육 플랫폼입니다.</p></div>
+      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>+</span></div><h3>전문 선생님</h3><p>각 과목·학년별 전문 선생님이 1:1 맞춤 수업을 진행합니다.</p></div>
+      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>h</span></div><h3>빠른 매칭</h3><p>신청 후 24시간 이내 전문 선생님을 연결합니다. 지역 제한 없이 맞춤 매칭.</p></div>
+    </div>
+  </div>
+</section>`;
+
+  // 과목 섹션
+  const subjectSection = subjectInfo ? `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">SUBJECT</span>
+    <h2 class="sec-title">${displayName} <em>${subject} 과외</em></h2>
+    <p class="sec-desc">${subjectInfo.emoji} ${subjectInfo.desc} 전담 선생님을 연결해드립니다.</p>
+    <div class="link-list">
+      ${Object.entries(SUBJECTS).map(([s, info]) =>
+        `<a href="/${encodeURIComponent(displayName + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
+      ).join('')}
+    </div>
+  </div>
+</section>` : `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">SUBJECTS</span>
+    <h2 class="sec-title">${displayName} <em>과목별 과외</em></h2>
+    <p class="sec-desc">수학·영어·국어·과학·사회·한국사 전 과목 1:1 맞춤 과외를 제공합니다.</p>
+    <div class="link-list">
+      ${Object.entries(SUBJECTS).map(([s, info]) =>
+        `<a href="/${encodeURIComponent(displayName + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
+      ).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // 학년 섹션
+  const gradeSection = gradeInfo ? `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">GRADE</span>
+    <h2 class="sec-title">${gradeLabel} <em>맞춤 커리큘럼</em></h2>
+    <p class="sec-desc">${gradeInfo.desc}. ${gradeInfo.detail}.</p>
+  </div>
+</section>` : `
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">GRADES</span>
+    <h2 class="sec-title">${displayName} <em>학년별 과외</em></h2>
+    <p class="sec-desc">초등·중등·고등 전 학년 맞춤 과외를 제공합니다.</p>
+    <div class="link-list">
+      ${Object.entries(GRADES).map(([g]) =>
+        `<a href="/${encodeURIComponent(displayName + g + '과외')}">📖 ${displayName} ${g}과외</a>`
+      ).join('')}
+    </div>
+  </div>
+</section>`;
+
+  // 가격 섹션
+  const priceSection = `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">PRICING</span>
+    <h2 class="sec-title">${displayName} 과외 <em>예상 비용</em></h2>
+    ${isVisit ? `<div class="price-text-block">
+      <h3>🏠 방문과외 예상 비용</h3>
+      <p>초등 월 26만원 / 중등 월 30만원 / 고1·2 월 34만원 / 고3 월 38만원</p>
+    </div>` : ''}
+    <div class="price-text-block">
+      <h3>💻 화상과외 예상 비용</h3>
+      <p>초등 월 24만원 / 중등 월 27만원 / 고1·2 월 31만원 / 고3 월 33만원</p>
+    </div>
+    <p class="price-note">※ 첫 30분 무료 체험 제공 · 정확한 비용은 무료 상담 후 안내</p>
+    <p class="price-note">(주 2회·1시간 기준, 수업 횟수·시간에 따라 달라질 수 있습니다)</p>
+  </div>
+</section>`;
+
+  // 하위/상위 지역 링크
+  const navLinks = buildOnlineNavLinks({ level, sido, sigungu, dong, subject });
+
+  // FAQ
+  const faqs = [
+    { q: `${displayName} 과외 선생님은 어떻게 연결되나요?`, a: `전국 각지의 검증된 선생님 중 ${displayName} 학생에게 최적인 분을 매칭해드립니다. 30년+ 교육 노하우를 바탕으로 학력·경력·수업 능력을 종합 평가합니다.` },
+    isVisit
+      ? { q: `${displayName} 방문과외도 가능한가요?`, a: `네, ${displayName} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업과 집에서 편하게 받는 화상 수업 중 선택하실 수 있습니다.` }
+      : { q: `화상 수업에 필요한 장비가 있나요?`, a: `태블릿 또는 노트북을 준비해주시면 됩니다. 수업 방법은 상담 후 안내해드립니다.` },
+    { q: `첫 수업은 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 체험 후 마음에 드시면 정식 수업을 진행하시고.` },
+    { q: `${displayName} 학교 내신 대비도 가능한가요?`, a: `드림과외 선생님들은 ${displayName} 인근 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학교 교과서·기출 중심 수업과 서술형·수행평가 대비도 함께 진행합니다.` },
+    { q: `수업 일정은 어떻게 조율하나요?`, a: `학생·학부모님이 원하시는 요일·시간을 말씀해주시면 맞춰드립니다. 주 1~5회 유연하게 설정 가능합니다.` },
+  ];
+
+  const faqSchema = buildFAQSchema(faqs);
+  const reviews   = buildReviews(displayName, subject);
+
+  const body = `
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">${level === 'dong' ? `📍 ${sido} · ${sigungu}` : level === 'sigungu' ? `📍 ${sido}` : '🌐 전국 서비스'}</div>
+    <h1 class="page-h1">${displayName}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
+    <p class="page-desc">
+      ${pageDesc}
+      상담 신청 후 24시간 내 매칭, 첫 30분 무료 체험.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      ${isVisit ? '<span class="hero-chip">🏠 방문과외</span>' : ''}
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">📋 내신 전문</span>
+      ${subject ? `<span class="hero-chip">${subjectInfo.emoji} ${subject} 전문</span>` : ''}
+    </div>
+  </div>
+</section>
+${onlineFeatures}
+${subjectSection}
+${gradeSection}
+${buildLearningSection(grade, subject, displayName)}
+${buildSubjectStudySection(subject, displayName)}
+${buildExamGuideSection(displayName)}
+${priceSection}
+${navLinks}
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">${displayName} 학부모 <em>실제 후기</em></h2>
+    <p class="sec-desc">${displayName}에서 드림과외를 경험한 학부모님의 실제 후기입니다.</p>
+    <div class="review-grid">
+      ${reviews.map(r => `<div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">${r.text}</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
+          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+${ctaBox(keyword)}
+${faqSection(faqs, faqSchema)}
+${consultForm({
+  leftTitle: `<em>지금 바로</em> 무료 상담<br>신청하세요`,
+  leftDesc: `${displayName} 전문 선생님을<br>24시간 내 연결해드립니다.`,
+  leftPts: [
+    '상담 후 24시간 내 선생님 매칭',
+    '첫 30분 무료 체험',
+    '전 과목 1:1 맞춤 수업',
+    '맞춤 커리큘럼 제공',
+  ],
+  regionValue: displayName,
+})}
+`;
+
+  const breadcrumb = buildOnlineBreadcrumb({ level, sido, sigungu, dong, grade, subject });
+
+  return layout({
+    head,
+    body,
+    breadcrumb,
+    keyword,
+    region: displayName,
+  });
+}
+
+function buildOnlineBreadcrumb({ level, sido, sigungu, dong, grade, subject }) {
+  const bc = [{ label: '홈', href: '/' }];
+  const suffix = (grade || '') + (subject || '') + '과외';
+  bc.push({ label: `${sido} 과외`, href: `/${encodeURIComponent(sido + '과외')}` });
+  if (level === 'sigungu' || level === 'dong') {
+    bc.push({ label: `${sigungu} 과외`, href: `/${encodeURIComponent(sigungu + '과외')}` });
+  }
+  if (level === 'dong') {
+    bc.push({ label: `${dong} ${suffix}` });
+  } else if (level === 'sigungu') {
+    bc.push({ label: `${sigungu} ${suffix}` });
+  } else {
+    bc.push({ label: `${sido} ${suffix}` });
+  }
+  return bc;
+}
+
+function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
+  const links = [];
+  const loc = dong || sigungu || sido;
+  const subjectLinks = Object.keys(SUBJECTS).map(s =>
+    `<a href="/${encodeURIComponent(loc + s + '과외')}">${s}과외</a>`
+  ).join('');
+
+  if (level === 'sido') {
+    const sigungus = Object.keys(ALL_REGIONS[sido] || {});
+    if (sigungus.length) {
+      links.push(`
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">AREAS</span>
+    <h2 class="sec-title">${sido} <em>시군구별 과외</em></h2>
+    <p class="sec-desc">아래 지역을 선택하시면 해당 시군구 전문 선생님을 안내해드립니다.</p>
+    <div class="card-grid">
+      ${sigungus.map(sg => {
+        const slug = subject ? `${sg}${subject}과외` : `${sg}과외`;
+        return `<div class="card"><a href="/${encodeURIComponent(slug)}">${sg} 과외</a></div>`;
+      }).join('')}
+    </div>
+  </div>
+</section>`);
+    }
+  } else if (level === 'sigungu') {
+    const dongs = ALL_REGIONS[sido]?.[sigungu] || [];
+    if (dongs.length) {
+      links.push(`
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">AREAS</span>
+    <h2 class="sec-title">${sigungu} <em>동별 과외</em></h2>
+    <p class="sec-desc">아래 동을 선택하시면 해당 지역 전문 선생님을 안내해드립니다.</p>
+    <div class="link-list" style="margin-bottom:16px"><a href="/${encodeURIComponent(sido + '과외')}">← ${sido} 과외 전체보기</a></div>
+    <div class="card-grid">
+      ${dongs.map(d => {
+        const slug = subject ? `${d}${subject}과외` : `${d}과외`;
+        return `<div class="card"><a href="/${encodeURIComponent(slug)}">${d} 과외</a></div>`;
+      }).join('')}
+    </div>
+  </div>
+</section>`);
+    }
+  } else {
+    links.push(`
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">RELATED</span>
+    <h2 class="sec-title">${dong} <em>관련 과외</em></h2>
+    <p class="sec-desc">상위 지역 및 다른 과목별 과외 정보를 확인하세요.</p>
+    <div class="link-list">
+      <a href="/${encodeURIComponent(sigungu + '과외')}">← ${sigungu} 과외 전체</a>
+      <a href="/${encodeURIComponent(sido + '과외')}">← ${sido} 과외 전체</a>
+      ${subjectLinks}
+    </div>
+  </div>
+</section>`);
+  }
+  return links.join('\n');
+}

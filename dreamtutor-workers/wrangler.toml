@@ -1,0 +1,21 @@
+name = "dreamtutor-seo"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers Routes - *과외 패턴은 이 Worker가 처리
+routes = [
+  { pattern = "dreamtutor.kr/*", zone_name = "dreamtutor.kr" },
+  { pattern = "www.dreamtutor.kr/*", zone_name = "dreamtutor.kr" }
+]
+
+[build]
+command = ""
+
+# 환경변수 (필요시)
+[vars]
+ENVIRONMENT = "production"
+
+# CPU/메모리 제한 (무료 플랜 기준)
+# CPU: 10ms per request (유료: 50ms)
+# 메모리: 128MB

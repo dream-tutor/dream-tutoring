@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(du:*)",
+      "Bash(wc:*)",
+      "Bash(head -1939 \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/src/data/schools.js\")",
+      "Read(//tmp/**)",
+      "Bash(cp:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(node -e \":*)",
+      "Bash(npx wrangler:*)",
+      "WebSearch",
+      "Bash(wc -l \"/c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/src/data/all_regions.js\")",
+      "Bash(head -20 \"/c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/src/data/all_regions.js\")",
+      "Bash(tail:*)",
+      "Bash(cd /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers)",
+      "Bash(du -sh /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/*)",
+      "Bash(wc -l /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/*)",
+      "Bash(head:*)",
+      "Bash(wc -l /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/schools.js)",
+      "Bash(tail -30 /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/schools.js)",
+      "Bash(cat \"/c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/.gitignore\")"
+    ]
+  }
+}
