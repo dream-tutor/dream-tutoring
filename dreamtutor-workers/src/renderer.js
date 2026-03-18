@@ -62,6 +62,21 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
     ? '방문과외·화상과외 모두 가능합니다.'
     : '화상과외로 집에서 편리하게 수업 받을 수 있습니다.';
 
+  const v = getVariant(displayDong);
+  const areaDesc = DONG_DESC[dong] || GU_DESC[gu] || `${gu}에 위치한 주거 지역입니다.`;
+  const heroDescArr = [
+    `${areaDesc} 드림과외는 ${displayDong} 인근에서 학생들을 지도해온 검증된 선생님을 연결해드립니다. ${gradeLabel} ${subjectLabel} 1:1 전문 과외로, ${visitText}`,
+    `${areaDesc} ${displayDong} 학생들의 성적 향상을 위해 경험 있는 전문 선생님을 빠르게 매칭해드립니다. ${gradeLabel} ${subjectLabel} 과외로, ${visitText}`,
+    `${areaDesc} 드림과외 선생님은 ${displayDong} 학교 내신 출제 경향을 파악하고 있습니다. ${gradeLabel} ${subjectLabel} 1:1 맞춤 수업으로, ${visitText}`,
+  ];
+  const heroDesc = heroDescArr[v];
+
+  // 중간 섹션 순서 변형 (v에 따라 순환)
+  const _secA = buildLearningSection(grade, subject, displayDong, nearSchoolName);
+  const _secB = buildSubjectStudySection(subject, displayDong);
+  const _secC = buildExamGuideSection(displayDong, nearSchoolName);
+  const midSections = v === 0 ? [_secA, _secB, _secC] : v === 1 ? [_secC, _secA, _secB] : [_secB, _secC, _secA];
+
   const body = `
 <!-- PAGE HERO -->
 <section class="page-hero">
@@ -69,9 +84,7 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
     <div class="region-badge">📍 ${sido} · ${gu}</div>
     <h1 class="page-h1">${displayDong}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
     <p class="page-desc">
-      ${DONG_DESC[dong] || `${gu}에 위치한 주거 지역입니다`}
-      드림과외는 ${displayDong} 인근에서 학생들을 지도해온 검증된 선생님을 연결해드립니다.
-      ${gradeLabel} ${subjectLabel} 1:1 전문 과외로, ${visitText}
+      ${heroDesc}
       상담 신청 후 24시간 내 매칭 가능하며, 첫 30분은 무료 체험입니다.
     </p>
     <div class="hero-btns">
@@ -166,11 +179,11 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
 
 ${buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit)}
 
-${buildLearningSection(grade, subject, displayDong, nearSchoolName)}
+${midSections[0]}
 
-${buildSubjectStudySection(subject, displayDong)}
+${midSections[1]}
 
-${buildExamGuideSection(displayDong, nearSchoolName)}
+${midSections[2]}
 
 ${priceTableHtml(displayDong, subject, isVisit)}
 
