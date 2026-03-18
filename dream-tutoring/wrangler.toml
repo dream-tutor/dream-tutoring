@@ -1,0 +1,14 @@
+name = "dreamtutor-schools"
+main = "src/index.js"
+compatibility_date = "2025-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+# dreamtutor.kr/schools/* 가 dreamtutor.kr/* 보다 우선순위 높아 충돌 없음
+routes = [
+  { pattern = "dreamtutor.kr/schools/*",     zone_name = "dreamtutor.kr" },
+  { pattern = "www.dreamtutor.kr/schools/*", zone_name = "dreamtutor.kr" }
+]
+
+[vars]
+ENVIRONMENT = "production"
+SITE_DOMAIN = "https://schools.dreamtutor.kr"

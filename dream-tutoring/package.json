@@ -1,0 +1,13 @@
+{
+  "name": "dreamtutor-schools",
+  "version": "1.0.0",
+  "description": "드림과외 전국 학교별 SEO 과외 페이지 - Cloudflare Workers",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>과외 플랫폼 사이트 구조 설계</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --primary: #4361EE;
+    --accent: #F72585;
+    --yellow: #FFD60A;
+    --green: #06D6A0;
+    --dark: #0D0D1A;
+    --dark2: #141428;
+    --card: #1A1A35;
+    --border: rgba(255,255,255,0.08);
+    --text: #E8E8F0;
+    --muted: #888899;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+    position: relative;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: 50%;
+    transform: translateX(-50%);
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(67,97,238,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(67,97,238,0.15);
+    border: 1px solid rgba(67,97,238,0.4);
+    color: #7B9FFF;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+  }
+  h1 span { color: var(--primary); }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+  }
+
+  /* SEO Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    flex: 1; min-width: 140px; max-width: 180px;
+  }
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); }
+
+  /* Section */
+  .section { margin-bottom: 48px; }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-title .icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .section-title .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* Site map grid */
+  .sitemap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .page-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .page-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .page-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .card-blue::before { background: var(--primary); }
+  .card-pink::before { background: var(--accent); }
+  .card-yellow::before { background: var(--yellow); }
+  .card-green::before { background: var(--green); }
+  .card-purple::before { background: #9B5DE5; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .card-url {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .page-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .page-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #BBBBD0;
+    padding: 7px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .page-list li:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--border);
+    color: white;
+  }
+  .page-list li .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .page-list li .seo-badge {
+    margin-left: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 100px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .high { background: rgba(247,37,133,0.2); color: #F72585; }
+  .med { background: rgba(255,214,10,0.2); color: #FFD60A; }
+  .low { background: rgba(6,214,160,0.2); color: #06D6A0; }
+
+  /* SEO 페이지 볼륨 */
+  .seo-volume-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 48px;
+  }
+  .volume-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .matrix-table th {
+    background: rgba(67,97,238,0.15);
+    color: #7B9FFF;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  .matrix-table th:first-child { border-radius: 10px 0 0 10px; }
+  .matrix-table th:last-child { border-radius: 0 10px 10px 0; }
+  .matrix-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #BBBBD0;
+  }
+  .matrix-table tr:last-child td { border-bottom: none; }
+  .matrix-table .num {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: white;
+  }
+  .priority-high { color: var(--accent); font-weight: 700; }
+  .priority-med { color: var(--yellow); font-weight: 700; }
+
+  /* CTA Buttons */
+  .cta-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+    justify-content: center;
+  }
+  .btn {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-primary:hover { background: #3451D1; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+  /* Flow diagram */
+  .flow-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 48px;
+  }
+  .flow-steps {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 22px;
+    color: var(--muted);
+    font-size: 18px;
+    z-index: 1;
+  }
+  .flow-circle {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-label {
+    font-size: 12px;
+    text-align: center;
+    color: #BBBBD0;
+    line-height: 1.4;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* 우선순위 로드맵 */
+  .roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .roadmap-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .phase-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .roadmap-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .roadmap-content p { font-size: 12px; color: var(--muted); }
+  .roadmap-pages {
+    margin-left: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    .flow-steps { flex-direction: column; }
+    .flow-step::after { display: none; }
+    .roadmap-item { flex-wrap: wrap; }
+    .roadmap-pages { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">🏗️ SITE ARCHITECTURE DESIGN</div>
+  <h1>과외 플랫폼<br><span>사이트 구조 설계</span></h1>
+  <p class="subtitle">구글/네이버 SEO 최적화 · 프로그래매틱 랜딩페이지 전략</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-num" style="color:#4361EE">5개</span>
+    <span class="stat-label">핵심 메뉴</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" style="color:#F72585">30+</span>
+    <span class="stat-label">기본 페이지</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" style="color:#FFD60A">5,000+</span>
+    <span class="stat-label">SEO 자동 페이지</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num" style="color:#06D6A0">3개</span>
+    <span class="stat-label">전환 CTA</span>
+  </div>
+</div>
+
+<!-- 사용자 흐름 -->
+<div class="flow-section">
+  <div class="volume-title">🔄 사용자 유입 → 전환 흐름</div>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-circle" style="background:rgba(67,97,238,0.2);color:#4361EE">🔍</div>
+      <div class="flow-label">구글/네이버<br>검색</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle" style="background:rgba(247,37,133,0.2);color:#F72585">📄</div>
+      <div class="flow-label">지역·과목별<br>랜딩페이지</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle" style="background:rgba(255,214,10,0.2);color:#FFD60A">🏠</div>
+      <div class="flow-label">메인/서비스<br>소개</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle" style="background:rgba(155,93,229,0.2);color:#9B5DE5">👩‍🏫</div>
+      <div class="flow-label">선생님<br>프로필</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle" style="background:rgba(6,214,160,0.2);color:#06D6A0">📞</div>
+      <div class="flow-label">상담 신청<br>전환!</div>
+    </div>
+  </div>
+</div>
+
+<!-- 메인 사이트맵 -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(67,97,238,0.15)">🏠</div>
+    <h2>메인 & 브랜드 페이지</h2>
+    <span class="tag" style="background:rgba(67,97,238,0.15);color:#7B9FFF">CORE</span>
+  </div>
+  <div class="sitemap-grid">
+
+    <div class="page-card card-blue">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(67,97,238,0.2)">🏠</div>
+        <div>
+          <div class="card-title">메인 홈</div>
+          <div class="card-url">/</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#4361EE"></span>히어로 배너 (슬라이더 5장)<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#4361EE"></span>핵심 수치 (30년/3,000명+)</li>
+        <li><span class="dot" style="background:#4361EE"></span>인기 과목/지역 바로가기</li>
+        <li><span class="dot" style="background:#4361EE"></span>추천 선생님 미리보기</li>
+        <li><span class="dot" style="background:#4361EE"></span>후기/신뢰 지표</li>
+        <li><span class="dot" style="background:#4361EE"></span>플로팅 CTA 3개</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-blue">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(67,97,238,0.2)">ℹ️</div>
+        <div>
+          <div class="card-title">서비스 소개</div>
+          <div class="card-url">/about</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#4361EE"></span>브랜드 스토리</li>
+        <li><span class="dot" style="background:#4361EE"></span>서비스 차별점</li>
+        <li><span class="dot" style="background:#4361EE"></span>이용 방법 (3~4단계)</li>
+        <li><span class="dot" style="background:#4361EE"></span>선생님 검증 과정</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-blue">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(67,97,238,0.2)">⭐</div>
+        <div>
+          <div class="card-title">후기/성공사례</div>
+          <div class="card-url">/reviews</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#4361EE"></span>전체 후기 목록<span class="seo-badge med">MED</span></li>
+        <li><span class="dot" style="background:#4361EE"></span>과목별 필터</li>
+        <li><span class="dot" style="background:#4361EE"></span>성적 향상 사례</li>
+        <li><span class="dot" style="background:#4361EE"></span>학부모/학생 인터뷰</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- 전국과외 (SEO 핵심) -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(247,37,133,0.15)">📍</div>
+    <h2>전국과외 <span style="color:#F72585">(SEO 핵심)</span></h2>
+    <span class="tag" style="background:rgba(247,37,133,0.2);color:#F72585">SEO ⭐⭐⭐</span>
+  </div>
+  <div class="sitemap-grid">
+
+    <div class="page-card card-pink">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(247,37,133,0.2)">🗺️</div>
+        <div>
+          <div class="card-title">지역별 과외</div>
+          <div class="card-url">/region/{시/도}/{구/군}</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#F72585"></span>강남구 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>서초구 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>부산 해운대 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>전국 250개 시군구 ↗</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-pink">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(247,37,133,0.2)">📚</div>
+        <div>
+          <div class="card-title">학년별 과외</div>
+          <div class="card-url">/grade/{학년}</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#F72585"></span>초등학생 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>중학생 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>고등학생 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>재수생/성인 과외</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-pink">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(247,37,133,0.2)">🏫</div>
+        <div>
+          <div class="card-title">학교별 과외</div>
+          <div class="card-url">/school/{학교명}</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#F72585"></span>○○중학교 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>○○고등학교 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#F72585"></span>전국 주요 학교 매핑</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- 과목별 -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(255,214,10,0.15)">✏️</div>
+    <h2>과목별 과외</h2>
+    <span class="tag" style="background:rgba(255,214,10,0.2);color:#FFD60A">SEO ⭐⭐⭐</span>
+  </div>
+  <div class="sitemap-grid">
+
+    <div class="page-card card-yellow">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(255,214,10,0.2)">🔢</div>
+        <div>
+          <div class="card-title">수학 과외</div>
+          <div class="card-url">/subject/math</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#FFD60A"></span>강남 수학 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#FFD60A"></span>중학 수학 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>수능 수학 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>미적분/기하 전문</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-yellow">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(255,214,10,0.2)">🔤</div>
+        <div>
+          <div class="card-title">영어 과외</div>
+          <div class="card-url">/subject/english</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#FFD60A"></span>영어 회화 과외<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#FFD60A"></span>수능 영어 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>영어 내신 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>원어민 화상과외</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-yellow">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(255,214,10,0.2)">📖</div>
+        <div>
+          <div class="card-title">국어/과학/사회</div>
+          <div class="card-url">/subject/{과목}</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#FFD60A"></span>국어 과외<span class="seo-badge med">MED</span></li>
+        <li><span class="dot" style="background:#FFD60A"></span>과학 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>사회/역사 과외</li>
+        <li><span class="dot" style="background:#FFD60A"></span>논술 전문 과외</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- 선생님 -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(6,214,160,0.15)">👩‍🏫</div>
+    <h2>선생님 프로필</h2>
+    <span class="tag" style="background:rgba(6,214,160,0.2);color:#06D6A0">CONVERSION</span>
+  </div>
+  <div class="sitemap-grid">
+
+    <div class="page-card card-green">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(6,214,160,0.2)">📋</div>
+        <div>
+          <div class="card-title">선생님 목록</div>
+          <div class="card-url">/tutors</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#06D6A0"></span>필터 (과목/지역/가격)</li>
+        <li><span class="dot" style="background:#06D6A0"></span>정렬 (평점/후기 수)</li>
+        <li><span class="dot" style="background:#06D6A0"></span>카드형 레이아웃</li>
+        <li><span class="dot" style="background:#06D6A0"></span>무한 스크롤</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-green">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(6,214,160,0.2)">👤</div>
+        <div>
+          <div class="card-title">선생님 상세 프로필</div>
+          <div class="card-url">/tutors/{id}</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#06D6A0"></span>학력/경력 소개<span class="seo-badge med">MED</span></li>
+        <li><span class="dot" style="background:#06D6A0"></span>과목/지역/수업료</li>
+        <li><span class="dot" style="background:#06D6A0"></span>수강생 후기</li>
+        <li><span class="dot" style="background:#06D6A0"></span>상담 신청 CTA</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-green">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(6,214,160,0.2)">✍️</div>
+        <div>
+          <div class="card-title">선생님 등록</div>
+          <div class="card-url">/tutors/register</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#06D6A0"></span>선생님 지원 혜택</li>
+        <li><span class="dot" style="background:#06D6A0"></span>등록 신청 폼</li>
+        <li><span class="dot" style="background:#06D6A0"></span>검증 절차 안내</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- 시험/상담 -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(155,93,229,0.15)">💬</div>
+    <h2>시험 대비 & 상담</h2>
+    <span class="tag" style="background:rgba(155,93,229,0.2);color:#9B5DE5">TRUST</span>
+  </div>
+  <div class="sitemap-grid">
+
+    <div class="page-card card-purple">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(155,93,229,0.2)">📝</div>
+        <div>
+          <div class="card-title">시험 대비</div>
+          <div class="card-url">/exam</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#9B5DE5"></span>수능 대비<span class="seo-badge high">HIGH</span></li>
+        <li><span class="dot" style="background:#9B5DE5"></span>내신 대비</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>검정고시 대비</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>자격증 시험</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-purple">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(155,93,229,0.2)">🆓</div>
+        <div>
+          <div class="card-title">무료 상담</div>
+          <div class="card-url">/consult</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#9B5DE5"></span>무료체험 신청 폼</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>전화 상담 예약</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>카카오톡 상담</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>화상과외 체험</li>
+      </ul>
+    </div>
+
+    <div class="page-card card-purple">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(155,93,229,0.2)">📖</div>
+        <div>
+          <div class="card-title">과외 가이드</div>
+          <div class="card-url">/guide</div>
+        </div>
+      </div>
+      <ul class="page-list">
+        <li><span class="dot" style="background:#9B5DE5"></span>과외 선택 방법<span class="seo-badge med">MED</span></li>
+        <li><span class="dot" style="background:#9B5DE5"></span>가격 기준 안내</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>과외 vs 학원 비교</li>
+        <li><span class="dot" style="background:#9B5DE5"></span>FAQ</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- SEO 볼륨 분석 -->
+<div class="seo-volume-section">
+  <div class="volume-title">📈 SEO 자동 페이지 생성 볼륨 계산</div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th>조합 유형</th>
+        <th>예시 키워드</th>
+        <th>페이지 수</th>
+        <th>검색량 수준</th>
+        <th>우선순위</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>지역 × 과목</td>
+        <td>강남 수학 과외</td>
+        <td class="num">250 × 8 = 2,000</td>
+        <td>★★★★★</td>
+        <td class="priority-high">최우선</td>
+      </tr>
+      <tr>
+        <td>지역 × 학년</td>
+        <td>강남 중학생 과외</td>
+        <td class="num">250 × 6 = 1,500</td>
+        <td>★★★★☆</td>
+        <td class="priority-high">최우선</td>
+      </tr>
+      <tr>
+        <td>지역 × 과목 × 학년</td>
+        <td>강남 중학 수학 과외</td>
+        <td class="num">250 × 8 × 6 = 12,000</td>
+        <td>★★★☆☆</td>
+        <td class="priority-med">2단계</td>
+      </tr>
+      <tr>
+        <td>학교명 × 과목</td>
+        <td>○○고 수학 과외</td>
+        <td class="num">500 × 5 = 2,500</td>
+        <td>★★★★☆</td>
+        <td class="priority-med">2단계</td>
+      </tr>
+      <tr>
+        <td>시험 × 과목</td>
+        <td>수능 수학 과외</td>
+        <td class="num">10 × 8 = 80</td>
+        <td>★★★★★</td>
+        <td class="priority-high">최우선</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 개발 로드맵 -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(67,97,238,0.15)">🗓️</div>
+    <h2>개발 우선순위 로드맵</h2>
+  </div>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <span class="phase-badge" style="background:rgba(247,37,133,0.2);color:#F72585">Phase 1</span>
+      <div class="roadmap-content">
+        <h4>🏠 메인 & 핵심 랜딩페이지</h4>
+        <p>홈, 서비스소개, 과목별 메인, 지역 메인 페이지 — SEO 기반 빠른 색인</p>
+      </div>
+      <div class="roadmap-pages">~10 페이지</div>
+    </div>
+    <div class="roadmap-item">
+      <span class="phase-badge" style="background:rgba(255,214,10,0.2);color:#FFD60A">Phase 2</span>
+      <div class="roadmap-content">
+        <h4>📍 지역 × 과목 조합 랜딩</h4>
+        <p>프로그래매틱 페이지 자동 생성 — 핵심 SEO 트래픽 유입</p>
+      </div>
+      <div class="roadmap-pages">~2,000 페이지</div>
+    </div>
+    <div class="roadmap-item">
+      <span class="phase-badge" style="background:rgba(6,214,160,0.2);color:#06D6A0">Phase 3</span>
+      <div class="roadmap-content">
+        <h4>👩‍🏫 선생님 프로필 & 상담 시스템</h4>
+        <p>선생님 등록/목록/상세, 무료체험 신청, 후기 시스템</p>
+      </div>
+      <div class="roadmap-pages">~20 페이지</div>
+    </div>
+    <div class="roadmap-item">
+      <span class="phase-badge" style="background:rgba(155,93,229,0.2);color:#9B5DE5">Phase 4</span>
+      <div class="roadmap-content">
+        <h4>🏫 학교별 & 가이드 콘텐츠</h4>
+        <p>학교별 페이지, 과외 가이드 블로그, 롱테일 키워드 확장</p>
+      </div>
+      <div class="roadmap-pages">~3,000 페이지</div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; color:var(--muted); font-size:12px; margin-top:40px; font-family:'Space Mono',monospace;">
+  Designed for SEO-first Tutoring Platform · 2026
+</div>
+
+</body>
+</html>

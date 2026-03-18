@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)\")",
+      "Bash(ls -la \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers\")",
+      "Bash(cd \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers\" && npm install 2>&1)",
+      "Bash(ls \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/src/\")",
+      "Bash(cmd /c \"mklink /J C:\\\\dreamtutor-workers \\\\\"C:\\\\Users\\\\goodj\\\\Desktop\\\\AI\\\\드림과외\\(dreamtutor.kr\\)\\\\dreamtutor-workers\\\\\"\" 2>&1)",
+      "Bash(powershell -Command \"cmd /c 'dir C:\\\\\\\\' | Select-String 'dreamtutor'\" 2>&1)",
+      "Bash(powershell -Command \"New-Item -ItemType Junction -Path 'C:\\\\dreamtutor-workers' -Target 'C:\\\\Users\\\\goodj\\\\Desktop\\\\AI\\\\드림과외\\(dreamtutor.kr\\)\\\\dreamtutor-workers' -Force\" 2>&1)",
+      "Read(//c/dreamtutor-workers/**)",
+      "Bash(npm install:*)",
+      "Bash(cd /c/dreamtutor-workers && npx wrangler login 2>&1)",
+      "Bash(cd /c/dreamtutor-workers && npm run deploy 2>&1)",
+      "Bash(cd /c/dreamtutor-workers && npx wrangler zones list 2>&1)",
+      "Bash(cd /c/dreamtutor-workers && npx wrangler whoami 2>&1)",
+      "Bash(cd /c/dreamtutor-workers && npx wrangler whoami 2>&1; echo \"EXIT: $?\")",
+      "Read(//c/Users/goodj/.wrangler/config/**)",
+      "Read(//c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/$APPDATA/.wrangler/config/**)",
+      "Read(//c/Users/goodj/AppData/**)",
+      "Bash(curl -s -X GET \"https://api.cloudflare.com/client/v4/zones?name=dreamtutor.kr\" \\\\\n  -H \"Authorization: Bearer JJZy9aYm6xwkyuEW_-38xQsVTfcqkH-KDbxJz4q-FrE.j4o1bj4-xjV1qmRV1iob6pIoWV0yItS-tjB0kju20Mk\" \\\\\n  -H \"Content-Type: application/json\" 2>&1)",
+      "Bash(powershell -Command \"\n\\\\$token = 'JJZy9aYm6xwkyuEW_-38xQsVTfcqkH-KDbxJz4q-FrE.j4o1bj4-xjV1qmRV1iob6pIoWV0yItS-tjB0kju20Mk'\n\\\\$headers = @{'Authorization' = \\\\\"Bearer \\\\$token\\\\\"; 'Content-Type' = 'application/json'}\n\\\\$response = Invoke-RestMethod -Uri 'https://api.cloudflare.com/client/v4/zones?name=dreamtutor.kr' -Headers \\\\$headers\n\\\\$response | ConvertTo-Json -Depth 5\n\" 2>&1)",
+      "Bash(TOKEN=\"JJZy9aYm6xwkyuEW_-38xQsVTfcqkH-KDbxJz4q-FrE.j4o1bj4-xjV1qmRV1iob6pIoWV0yItS-tjB0kju20Mk\"\npowershell.exe -NoProfile -NonInteractive -Command \"Invoke-RestMethod -Uri 'https://api.cloudflare.com/client/v4/zones?name=dreamtutor.kr' -Headers @{Authorization='Bearer $TOKEN'} | ConvertTo-Json -Depth 5\" 2>&1)",
+      "Bash(sleep 3 && TOKEN=\"JJZy9aYm6xwkyuEW_-38xQsVTfcqkH-KDbxJz4q-FrE.j4o1bj4-xjV1qmRV1iob6pIoWV0yItS-tjB0kju20Mk\" && powershell.exe -NoProfile -NonInteractive -Command \"Invoke-RestMethod -Uri 'https://api.cloudflare.com/client/v4/zones?name=dreamtutor.kr' -Headers @{Authorization='Bearer $TOKEN'} | ConvertTo-Json -Depth 5\" 2>&1)",
+      "Bash(cd /c/dreamtutor-workers && npx wrangler routes list --zone dreamtutor.kr 2>&1; echo \"EXIT:$?\")",
+      "Bash(cd /c/dreamtutor-workers && npm run deploy 2>&1; echo \"EXIT:$?\")",
+      "Bash(curl -s \"http://localhost:8787/%EA%B3%A0%EB%8D%95%EB%8F%99%EC%88%98%ED%95%99%EA%B3%BC%EC%99%B8\" | sed 's/<[^>]*>//g' | tr -s ' \\\\n\\\\t' ' ' | wc -c)",
+      "Bash(find \"C:\\\\Users\\\\goodj\\\\Desktop\\\\AI\\\\드림과외\\(dreamtutor.kr\\)\\\\dreamtutor-workers\" -type f -not -path \"*/node_modules/*\" -not -path \"*/.wrangler/*\" -not -path \"*/.github/*\" | head -30)",
+      "Bash(cd \"C:\\\\Users\\\\goodj\\\\Desktop\\\\AI\\\\드림과외\\(dreamtutor.kr\\)\\\\dreamtutor-workers\" && npm run deploy 2>&1)",
+      "Bash(find \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/src\" -name \"*.js\" -not -path \"*/node_modules/*\" 2>/dev/null)",
+      "Bash(cd \"C:/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers\" && npm run deploy 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\goodj\\\\Desktop\\\\AI\\\\드림과외\\(dreamtutor.kr\\)\\\\dreamtutor-workers\" && npx wrangler deploy 2>&1)",
+      "Bash(cd:*)",
+      "WebSearch",
+      "Bash(claude logout:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
