@@ -52,7 +52,7 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
   const faqSchema = buildFAQSchema(faqs);
   const nearSchoolName = DONG_SCHOOLS[dong] || null;
   const relatedLinks = buildDongRelatedLinks({ dong, displayDong, gu, grade, subject, nearSchoolName });
-  const reviews = buildReviews(displayDong, subject);
+
 
   const subjectLabel = subjectInfo ? subjectInfo.desc : (subject ? `${subject} 전 과정` : '전 과목');
   const gradeLabel = gradeInfo ? gradeInfo.desc : '초·중·고 전 학년';
@@ -174,28 +174,6 @@ ${buildExamGuideSection(displayDong)}
 
 ${priceTableHtml(displayDong, subject, isVisit)}
 
-<!-- REVIEWS -->
-<section class="sec sec-bg">
-  <div class="wrap">
-    <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayDong} <em>수업 후기</em></h2>
-    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
-    <div class="review-grid">
-      ${reviews.map(r => `<div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">${r.text}</p>
-        <div class="review-author">
-          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
-          <div>
-            <div class="review-name">${r.name}</div>
-            <div class="review-info">${r.info}</div>
-          </div>
-        </div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
-
 ${ctaBox(keyword)}
 
 <!-- RELATED LINKS -->
@@ -260,7 +238,6 @@ export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
 </div>`;
   }).join('');
 
-  const reviews = buildReviews(displayGu, subject);
 
   const faqs = [
     { q: `${displayGu} 방문과외도 가능한가요?`, a: `네, ${displayGu} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업을 제공하며, 상황에 따라 화상과외로도 동일한 수준의 수업을 받을 수 있습니다.` },
@@ -343,24 +320,6 @@ ${buildExamGuideSection(displayGu)}
 
 ${priceTableHtml(displayGu, subject, true)}
 
-<section class="sec sec-bg">
-  <div class="wrap">
-    <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayGu} <em>수업 후기</em></h2>
-    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
-    <div class="review-grid">
-      ${reviews.map(r => `<div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">${r.text}</p>
-        <div class="review-author">
-          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
-          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
-        </div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
-
 ${ctaBox(keyword)}
 ${faqSection(faqs, faqSchema)}
 
@@ -400,7 +359,6 @@ export function renderSidoPage({ sido, grade, subject }) {
     `<a href="/${encodeURIComponent(sido + (grade || '') + s + '과외')}">${subjectEmoji(info)} ${sido} ${s}과외</a>`
   ).join('');
 
-  const reviews = buildReviews(sido, subject);
 
   const faqs = [
     { q: `${sido}에서 화상과외가 효과가 있나요?`, a: `네, 화상과외는 방문과외와 동일한 1:1 수업 효과를 제공합니다. 오히려 이동 시간이 없어 더 많은 시간을 학습에 집중할 수 있으며, 전국 최고 수준의 선생님과 수업이 가능합니다.` },
@@ -495,24 +453,6 @@ ${buildExamGuideSection(sido)}
 
 ${priceTableHtml(sido, subject, gus.length > 0)}
 
-<section class="sec sec-wh">
-  <div class="wrap">
-    <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${sido} <em>수업 후기</em></h2>
-    <p class="sec-desc">드림과외 화상수업을 경험한 학부모님의 후기입니다.</p>
-    <div class="review-grid">
-      ${reviews.map(r => `<div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">${r.text}</p>
-        <div class="review-author">
-          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
-          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
-        </div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
-
 ${ctaBox(keyword)}
 ${faqSection(faqs, faqSchema)}
 
@@ -580,7 +520,6 @@ export function renderSchoolPage({ schoolName, dong, gu, sido, grade, subject })
   ]);
   const faqSectionHtml = buildFAQSchema([]);  // schema only — section built below
 
-  const reviews  = buildReviews(displayDong, subject);
   const faqItems = [
     {
       q: `${schoolName} 내신 대비 과외가 가능한가요?`,
@@ -740,28 +679,6 @@ ${buildLearningSection(inferGrade, subject, schoolName)}
 ${buildSubjectStudySection(subject, shortName)}
 
 ${buildExamGuideSection(schoolName)}
-
-<!-- 후기 -->
-<section class="sec sec-bg">
-  <div class="wrap">
-    <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayDong} <em>수업 후기</em></h2>
-    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
-    <div class="review-grid">
-      ${reviews.map(r => `<div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">${r.text}</p>
-        <div class="review-author">
-          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
-          <div>
-            <div class="review-name">${r.name}</div>
-            <div class="review-info">${r.info}</div>
-          </div>
-        </div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
 
 ${ctaBox(keyword)}
 
@@ -1081,31 +998,6 @@ function buildExamGuideSection(location) {
 </section>`;
 }
 
-// ── 헬퍼: 학부모 후기 생성 ────────────────────────────
-function buildReviews(location, subject) {
-  const s = subject || '수학';
-  return [
-    {
-      avatar: '김', color: '#2563EB',
-      name: '김○○ 학생 어머니',
-      info: `${location} · 중학교 3학년 · ${s}`,
-      text: `드림과외 ${s} 선생님을 통해 학교 기출 경향에 맞게 준비할 수 있었어요. 아이가 수업에 잘 따라가고 모르는 부분을 바로 물어볼 수 있어서 좋아했습니다. 첫 체험 수업이 무료라 부담 없이 시작할 수 있었어요.`,
-    },
-    {
-      avatar: '박', color: '#F59E0B',
-      name: '박○○ 학생',
-      info: `${location} · 고등학교 2학년 · ${s}`,
-      text: `교과서 본문과 서술형 유형을 꼼꼼히 짚어주셔서 시험 준비가 수월했습니다. 학교 시험 출제 경향을 파악하고 계셔서 효율적으로 준비할 수 있었어요. 선생님 매칭도 빠르게 돼서 좋았습니다.`,
-    },
-    {
-      avatar: '이', color: '#10B981',
-      name: '이○○ 학생 어머니',
-      info: `${location} · 초등학교 5학년 · ${s}`,
-      text: `선생님이 아이 눈높이에 맞게 설명해 주셔서 ${s}에 흥미를 갖게 됐어요. 방문 과외라 이동 없이 편하고, 진도 관리도 꼼꼼히 해주셔서 학교 수업을 잘 따라가고 있습니다.`,
-    },
-  ];
-}
-
 // ── 헬퍼: 지역 차별화 섹션 ─────────────────────────────
 function buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit) {
   const areaDesc = DONG_DESC[dong] || `${gu}에 위치한 주거 지역입니다.`;
@@ -1371,7 +1263,6 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
   ];
 
   const faqSchema = buildFAQSchema(faqs);
-  const reviews   = buildReviews(displayName, subject);
 
   const body = `
 <section class="page-hero">
@@ -1405,23 +1296,6 @@ ${buildSubjectStudySection(subject, displayName)}
 ${buildExamGuideSection(displayName)}
 ${priceSection}
 ${navLinks}
-<section class="sec sec-bg">
-  <div class="wrap">
-    <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayName} <em>수업 후기</em></h2>
-    <p class="sec-desc">드림과외를 통해 수업을 경험한 학부모님의 후기입니다.</p>
-    <div class="review-grid">
-      ${reviews.map(r => `<div class="review-card">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">${r.text}</p>
-        <div class="review-author">
-          <div class="review-avatar" style="background:${r.color}">${r.avatar}</div>
-          <div><div class="review-name">${r.name}</div><div class="review-info">${r.info}</div></div>
-        </div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
 ${ctaBox(keyword)}
 ${faqSection(faqs, faqSchema)}
 ${consultForm({
