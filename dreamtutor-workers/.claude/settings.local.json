@@ -23,7 +23,9 @@
       "Bash(head:*)",
       "Bash(wc -l /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/schools.js)",
       "Bash(tail -30 /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\)/dreamtutor-workers/src/data/schools.js)",
-      "Bash(cat \"/c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/.gitignore\")"
+      "Bash(cat \"/c/Users/goodj/Desktop/AI/드림과외\\(dreamtutor.kr\\)/dreamtutor-workers/.gitignore\")",
+      "Bash(cd /c/Users/goodj/Desktop/AI/드림과외\\\\\\(dreamtutor.kr\\\\\\))",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

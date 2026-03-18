@@ -164,6 +164,8 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
   </div>
 </section>
 
+${buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit)}
+
 ${buildLearningSection(grade, subject, displayDong)}
 
 ${buildSubjectStudySection(subject, displayDong)}
@@ -176,11 +178,8 @@ ${priceTableHtml(displayDong, subject, isVisit)}
 <section class="sec sec-bg">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayDong} 학부모 <em>실제 후기</em></h2>
-    <p class="sec-desc">
-      ${displayDong}에서 드림과외를 경험한 학생과 학부모님의 실제 이야기입니다.
-      과장 없이 직접 전달받은 생생한 후기를 확인하세요.
-    </p>
+    <h2 class="sec-title">${displayDong} <em>수업 후기</em></h2>
+    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
     <div class="review-grid">
       ${reviews.map(r => `<div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -268,7 +267,7 @@ export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
     { q: `${displayGu} 학교 내신 대비도 가능한가요?`, a: `드림과외 선생님들은 ${displayGu} 인근 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학생 학교와 학년에 맞춘 내신 대비 수업 및 서술형·수행평가 대비도 함께 진행합니다.` },
     { q: `선생님 매칭은 얼마나 걸리나요?`, a: `상담 신청 후 24시간 이내에 최적의 선생님을 매칭해드립니다. 급하신 경우 전화 상담으로 더 빠른 매칭이 가능합니다.` },
     { q: `${displayGu} 선생님은 어떻게 연결되나요?`, a: `드림과외는 30년+ 교육 노하우를 바탕으로 학력·경력·수업 능력을 종합적으로 평가한 전문 선생님을 연결합니다. 수강생 피드백을 지속적으로 관리하며 수업 품질을 유지합니다.` },
-    { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있으며.` },
+    { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있습니다.` },
   ];
   const faqSchema = buildFAQSchema(faqs);
 
@@ -347,8 +346,8 @@ ${priceTableHtml(displayGu, subject, true)}
 <section class="sec sec-bg">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayGu} 학부모 <em>실제 후기</em></h2>
-    <p class="sec-desc">${displayGu}에서 드림과외를 경험한 학생과 학부모님의 생생한 후기입니다.</p>
+    <h2 class="sec-title">${displayGu} <em>수업 후기</em></h2>
+    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
     <div class="review-grid">
       ${reviews.map(r => `<div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -499,8 +498,8 @@ ${priceTableHtml(sido, subject, gus.length > 0)}
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${sido} 학부모 <em>실제 후기</em></h2>
-    <p class="sec-desc">${sido}에서 드림과외 화상수업을 경험한 학부모님의 실제 이야기입니다.</p>
+    <h2 class="sec-title">${sido} <em>수업 후기</em></h2>
+    <p class="sec-desc">드림과외 화상수업을 경험한 학부모님의 후기입니다.</p>
     <div class="review-grid">
       ${reviews.map(r => `<div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -746,8 +745,8 @@ ${buildExamGuideSection(schoolName)}
 <section class="sec sec-bg">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayDong} 학부모 <em>실제 후기</em></h2>
-    <p class="sec-desc">드림과외를 경험한 학생과 학부모님의 실제 후기입니다.</p>
+    <h2 class="sec-title">${displayDong} <em>수업 후기</em></h2>
+    <p class="sec-desc">드림과외를 통해 수업을 경험한 학생과 학부모님의 후기입니다.</p>
     <div class="review-grid">
       ${reviews.map(r => `<div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -1090,21 +1089,55 @@ function buildReviews(location, subject) {
       avatar: '김', color: '#2563EB',
       name: '김○○ 학생 어머니',
       info: `${location} · 중학교 3학년 · ${s}`,
-      text: `${location}에서 드림과외 ${s} 선생님을 만났는데, 3개월 만에 내신 점수가 확 올랐어요! 학교 기출 경향을 너무 정확히 파악하고 계셔서 시험 대비에 정말 효과적이었습니다. 무엇보다 아이가 선생님을 너무 잘 따르고 수업을 기다리게 됐어요. 처음 체험 수업이 무료여서 부담 없이 시작할 수 있었던 것도 너무 좋았습니다.`,
+      text: `드림과외 ${s} 선생님을 통해 학교 기출 경향에 맞게 준비할 수 있었어요. 아이가 수업에 잘 따라가고 모르는 부분을 바로 물어볼 수 있어서 좋아했습니다. 첫 체험 수업이 무료라 부담 없이 시작할 수 있었어요.`,
     },
     {
       avatar: '박', color: '#F59E0B',
       name: '박○○ 학생',
       info: `${location} · 고등학교 2학년 · ${s}`,
-      text: `${s} 성적이 많이 올랐어요! 교과서 본문과 서술형 유형을 꼼꼼하게 짚어주신 덕분에 시험 준비가 훨씬 수월했습니다. 학교 시험 유형과 출제 경향을 잘 파악하고 계셔서 효과적이었어요. 선생님 매칭도 하루 만에 돼서 시험 직전에도 빠르게 시작할 수 있었어요.`,
+      text: `교과서 본문과 서술형 유형을 꼼꼼히 짚어주셔서 시험 준비가 수월했습니다. 학교 시험 출제 경향을 파악하고 계셔서 효율적으로 준비할 수 있었어요. 선생님 매칭도 빠르게 돼서 좋았습니다.`,
     },
     {
       avatar: '이', color: '#10B981',
       name: '이○○ 학생 어머니',
       info: `${location} · 초등학교 5학년 · ${s}`,
-      text: `초등학생인데도 선생님이 눈높이에 딱 맞게 쉽고 재미있게 설명해 주셔서 아이가 ${s}에 흥미를 갖게 됐어요. ${location} 방문 과외라 이동할 필요가 없어서 너무 편하고 좋았습니다. 진도 관리도 꼼꼼히 해주셔서 학교 수업 따라가는 데 자신감이 생겼어요. 강력히 추천합니다!`,
+      text: `선생님이 아이 눈높이에 맞게 설명해 주셔서 ${s}에 흥미를 갖게 됐어요. 방문 과외라 이동 없이 편하고, 진도 관리도 꼼꼼히 해주셔서 학교 수업을 잘 따라가고 있습니다.`,
     },
   ];
+}
+
+// ── 헬퍼: 지역 차별화 섹션 ─────────────────────────────
+function buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit) {
+  const areaDesc = DONG_DESC[dong] || `${gu}에 위치한 주거 지역입니다.`;
+  const visitCard = isVisit
+    ? `<div class="str-card"><span class="str-icon">🏠</span><h3>방문·화상과외 모두 가능</h3><p>${displayDong} 지역은 학생 자택 방문과외와 화상과외를 모두 선택할 수 있습니다. 상황에 따라 유연하게 변경도 가능합니다.</p></div>`
+    : `<div class="str-card"><span class="str-icon">💻</span><h3>화상과외로 진행</h3><p>${displayDong} 지역은 화상과외로 진행됩니다. 이동 시간 없이 집에서 전문 선생님과 1:1 수업이 가능합니다.</p></div>`;
+  const schoolCard = nearSchoolName
+    ? `<div class="str-card"><span class="str-icon">🏫</span><h3>${nearSchoolName} 내신 대비</h3><p>${nearSchoolName} 학생의 내신 준비를 도와드립니다. 학교 교과서 기반 수업과 서술형·수행평가 대비를 함께 진행합니다.</p></div>`
+    : `<div class="str-card"><span class="str-icon">📋</span><h3>${gu} 학교 내신 대비</h3><p>${gu} 인근 학교의 내신 출제 경향에 맞춘 수업을 진행합니다. 학교 교과서와 기출 문제를 중심으로 준비합니다.</p></div>`;
+
+  return `
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">LOCAL INFO</span>
+    <h2 class="sec-title">${displayDong} <em>지역 안내</em></h2>
+    <p class="sec-desc">${areaDesc}</p>
+    <div class="str-grid">
+      <div class="str-card">
+        <span class="str-icon">📍</span>
+        <h3>${displayDong} 위치</h3>
+        <p>${gu}에 위치한 ${displayDong} 지역 학생을 위해 드림과외 선생님을 연결해드립니다.</p>
+      </div>
+      ${visitCard}
+      ${schoolCard}
+      <div class="str-card">
+        <span class="str-icon">📅</span>
+        <h3>유연한 수업 일정</h3>
+        <p>학생과 학부모님의 일정에 맞춰 주 1~5회, 1회 1~2시간으로 수업 일정을 조율합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>`;
 }
 
 // ── 헬퍼: FAQ 5개 생성 ────────────────────────────────
@@ -1332,7 +1365,7 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
     isVisit
       ? { q: `${displayName} 방문과외도 가능한가요?`, a: `네, ${displayName} 지역은 방문과외와 화상과외 모두 가능합니다. 학생 자택으로 직접 방문하는 1:1 수업과 집에서 편하게 받는 화상 수업 중 선택하실 수 있습니다.` }
       : { q: `화상 수업에 필요한 장비가 있나요?`, a: `태블릿 또는 노트북을 준비해주시면 됩니다. 수업 방법은 상담 후 안내해드립니다.` },
-    { q: `첫 수업은 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 체험 후 마음에 드시면 정식 수업을 진행하시고.` },
+    { q: `첫 수업은 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 체험 후 선생님이 맞으면 정식 수업을 진행하시면 됩니다.` },
     { q: `${displayName} 학교 내신 대비도 가능한가요?`, a: `드림과외 선생님들은 ${displayName} 인근 학교 내신 대비에 충분한 경험을 갖추고 있습니다. 학교 교과서·기출 중심 수업과 서술형·수행평가 대비도 함께 진행합니다.` },
     { q: `수업 일정은 어떻게 조율하나요?`, a: `학생·학부모님이 원하시는 요일·시간을 말씀해주시면 맞춰드립니다. 주 1~5회 유연하게 설정 가능합니다.` },
   ];
@@ -1375,8 +1408,8 @@ ${navLinks}
 <section class="sec sec-bg">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
-    <h2 class="sec-title">${displayName} 학부모 <em>실제 후기</em></h2>
-    <p class="sec-desc">${displayName}에서 드림과외를 경험한 학부모님의 실제 후기입니다.</p>
+    <h2 class="sec-title">${displayName} <em>수업 후기</em></h2>
+    <p class="sec-desc">드림과외를 통해 수업을 경험한 학부모님의 후기입니다.</p>
     <div class="review-grid">
       ${reviews.map(r => `<div class="review-card">
         <div class="review-stars">★★★★★</div>
