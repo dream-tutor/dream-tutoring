@@ -166,11 +166,11 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
 
 ${buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit)}
 
-${buildLearningSection(grade, subject, displayDong)}
+${buildLearningSection(grade, subject, displayDong, nearSchoolName)}
 
 ${buildSubjectStudySection(subject, displayDong)}
 
-${buildExamGuideSection(displayDong)}
+${buildExamGuideSection(displayDong, nearSchoolName)}
 
 ${priceTableHtml(displayDong, subject, isVisit)}
 
@@ -674,11 +674,11 @@ export function renderSchoolPage({ schoolName, dong, gu, sido, grade, subject })
   </div>
 </section>
 
-${buildLearningSection(inferGrade, subject, schoolName)}
+${buildLearningSection(inferGrade, subject, schoolName, schoolName)}
 
 ${buildSubjectStudySection(subject, shortName)}
 
-${buildExamGuideSection(schoolName)}
+${buildExamGuideSection(schoolName, schoolName)}
 
 ${ctaBox(keyword)}
 
@@ -709,150 +709,175 @@ ${consultForm({
   return layout({ head, body, breadcrumb, keyword, region: displayDong });
 }
 
+// ── 헬퍼: 지역명 기반 변형 인덱스 (0·1·2) ───────────────────
+function getVariant(location) {
+  let h = 0;
+  for (let i = 0; i < location.length; i++) h += location.charCodeAt(i);
+  return h % 3;
+}
+
 // ── 헬퍼: 학습 콘텐츠 섹션 생성 ─────────────────────────
-function buildLearningSection(grade, subject, location) {
-  // 과목별 공부 방법
-  const subjectMethod = {
+function buildLearningSection(grade, subject, location, nearSchoolName = null) {
+  const v = getVariant(location);
+  const schoolRef = nearSchoolName || `${location} 인근`;
+
+  const sm = subject ? {
     수학: { title: '수학 과외 학습 방법', steps: ['개념 이해 → 유형 훈련 → 실전 문제 풀이', '오답 노트 작성으로 취약 유형 반복 보완', '학교 교과서 기반 내신 기출 집중 분석'] },
     영어: { title: '영어 과외 학습 방법', steps: ['어휘 학습 → 독해 훈련 → 쓰기·말하기 적용', '교과서 본문 분석과 서술형 표현 정리', '수능 유형(빈칸·순서·주제) 반복 연습'] },
     국어: { title: '국어 과외 학습 방법', steps: ['기초 문법 → 독해 전략 → 서술형 답안 작성', '문학 작품 분석과 현대어 풀이 훈련', '내신 기출 서술형과 수능 국어 유형 대비'] },
     과학: { title: '과학 과외 학습 방법', steps: ['핵심 개념 이해 → 원리 적용 → 응용 문제 풀이', '물리·화학·생물·지구과학 단원별 체계적 학습', '수행평가·실험 보고서 작성 함께 대비'] },
     사회: { title: '사회 과외 학습 방법', steps: ['개념 흐름 파악 → 사건·맥락 연결 → 암기 전략', '지리·역사·일반사회 단원 균형 있게 학습', '서술형 문제 대비 및 수행평가 답안 작성'] },
     한국사: { title: '한국사 과외 학습 방법', steps: ['시대별 흐름 파악 → 주요 사건·인물 암기', '내신 서술형과 한국사능력검정시험 동시 대비', '연표 정리와 오답 반복으로 장기 기억 강화'] },
-  };
-
-  const sm = subject ? subjectMethod[subject] : null;
+  }[subject] : null;
   const subjectBlock = sm ? `
     <div class="learning-method">
       <h3>${sm.title}</h3>
-      <ul>
-        ${sm.steps.map(s => `<li>${s}</li>`).join('')}
-      </ul>
+      <ul>${sm.steps.map(s => `<li>${s}</li>`).join('')}</ul>
     </div>` : '';
 
-  // 학년별 학습 콘텐츠
+  const cardsHtml = cards => cards.map(c =>
+    `<div class="learning-card"><span class="learning-icon">${c.icon}</span><h3>${c.title}</h3><p>${c.desc}</p></div>`
+  ).join('');
+
+  // ── 초등 ──
   if (grade === '초등') {
+    const intro = [
+      `초등 시기는 학습 습관과 기초 학력의 토대를 만드는 중요한 단계입니다. 드림과외는 아이의 흥미를 살리면서 자기주도학습 능력을 함께 키워드립니다.`,
+      `초등학교 때 만들어진 공부 습관은 중·고등학교까지 이어집니다. 드림과외는 아이가 부담 없이 공부와 친해질 수 있도록 눈높이 맞춤 수업으로 지도합니다.`,
+      `기초 학력을 탄탄하게 다져두면 중학교 진학 후 훨씬 수월합니다. 드림과외는 ${location} 학교 교과서 중심으로 기초부터 차근차근 잡아드립니다.`,
+    ][v];
+    const cards = [
+      [
+        { icon:'📖', title:'기초 학력 강화', desc:'학교 교과서 중심으로 개념을 탄탄히 다집니다. 모르는 부분을 즉시 바로잡아 학교 수업에 자신감을 갖게 해드립니다.' },
+        { icon:'🌱', title:'학습 습관 형성', desc:'스스로 예습·복습하는 루틴을 만들어드립니다. 숙제 관리와 계획 세우기를 선생님과 함께 연습합니다.' },
+        { icon:'✏️', title:'수행평가 대비', desc:'학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.' },
+        { icon:'😊', title:'과목 흥미 유발', desc:'눈높이에 맞는 설명으로 과목에 흥미와 자신감을 심어드립니다. 싫어하는 과목도 재미있게 접근합니다.' },
+      ],
+      [
+        { icon:'📖', title:'기초 개념 완성', desc:'이해가 안 된 부분은 다음으로 넘기지 않고 확실히 짚고 갑니다. 단원마다 완성도 있게 학습합니다.' },
+        { icon:'🌱', title:'자기주도 습관', desc:'예습·복습·숙제 관리를 습관으로 만들어드립니다. 선생님 없이도 스스로 공부할 수 있는 힘을 기릅니다.' },
+        { icon:'✏️', title:'수행평가 준비', desc:'보고서, 발표, 과제를 선생님과 미리 준비합니다. 일정을 함께 관리해 마감에 쫓기지 않도록 합니다.' },
+        { icon:'😊', title:'흥미·자신감 형성', desc:'어렵게 느껴지는 과목을 아이 수준에 맞게 다시 설명합니다. 흥미가 생기면 점수도 자연히 따라옵니다.' },
+      ],
+      [
+        { icon:'📖', title:'교과서 단원 완성', desc:'교과서 진도에 맞춰 단원별 핵심을 정리합니다. 모르는 채로 넘어가는 일 없이 한 단원씩 완성합니다.' },
+        { icon:'🌱', title:'공부 루틴 만들기', desc:'공부 루틴이 없는 아이도 선생님과 함께 일정을 잡으며 스스로 하는 습관을 기릅니다.' },
+        { icon:'✏️', title:'수행평가 전 과정', desc:'보고서 쓰기부터 발표 연습까지 수행평가 전 과정을 단계별로 함께 준비합니다.' },
+        { icon:'😊', title:'눈높이 맞춤 설명', desc:'아이가 이해할 수 있는 언어와 예시로 설명합니다. 지루하거나 어려운 과목도 쉽게 받아들이도록 접근합니다.' },
+      ],
+    ][v];
     return `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">LEARNING GUIDE</span>
     <h2 class="sec-title">${location} 초등 과외 <em>학습 가이드</em></h2>
-    <p class="sec-desc">
-      초등 시기는 학습 습관과 기초 학력의 토대를 만드는 중요한 단계입니다.
-      드림과외는 아이의 흥미를 살리면서 자기주도학습 능력을 함께 키워드립니다.
-    </p>
-    <div class="learning-grid">
-      <div class="learning-card">
-        <span class="learning-icon">📖</span>
-        <h3>기초 학력 강화</h3>
-        <p>학교 교과서 중심으로 개념을 탄탄하게 다집니다. 모르는 부분을 바로잡아 학교 수업에 자신감을 갖게 해드립니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">🌱</span>
-        <h3>자기주도학습 습관</h3>
-        <p>스스로 예습·복습하는 습관을 형성합니다. 숙제 관리와 공부 루틴을 선생님과 함께 잡아드립니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">✏️</span>
-        <h3>수행평가 대비</h3>
-        <p>학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">😊</span>
-        <h3>과목별 흥미 유발</h3>
-        <p>눈높이에 맞는 설명으로 과목에 흥미와 자신감을 갖게 해드립니다. 싫어하는 과목도 재미있게 접근합니다.</p>
-      </div>
-    </div>
+    <p class="sec-desc">${intro}</p>
+    <div class="learning-grid">${cardsHtml(cards)}</div>
     ${subjectBlock}
   </div>
 </section>`;
   }
 
+  // ── 중등 ──
   if (grade === '중등') {
+    const intro = [
+      `중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다. 드림과외는 ${schoolRef} 학교 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.`,
+      `중학교 때 내신을 잘 관리하면 고등학교 진학 후 선택의 폭이 넓어집니다. 드림과외는 ${nearSchoolName ? nearSchoolName + '을 포함한 ' : ''}${location} 인근 학교 기출 경향에 맞춘 수업을 제공합니다.`,
+      `중등 내신은 지필고사와 수행평가 두 축을 모두 챙겨야 합니다. 드림과외는 ${location} 학교 일정에 맞춰 시험 전 집중 관리와 평소 수업을 병행합니다.`,
+    ][v];
+    const cards = [
+      [
+        { icon:'📝', title:'내신 집중 대비', desc:'학교별 기출 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.' },
+        { icon:'📋', title:'수행평가 관리', desc:'서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.' },
+        { icon:'📚', title:'공부 방법 코칭', desc:'과목별 효과적인 공부 방법을 알려드립니다. 오답 노트 활용과 복습 루틴을 함께 만들어드립니다.' },
+        { icon:'🎯', title:'자기주도학습', desc:'선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.' },
+      ],
+      [
+        { icon:'📝', title:'기출 경향 분석', desc:`${nearSchoolName ? nearSchoolName + ' 등 ' : ''}인근 학교의 출제 패턴을 분석하고 자주 나오는 유형을 집중 훈련합니다.` },
+        { icon:'📋', title:'서술형·수행평가', desc:'서술형 답안 작성과 수행평가를 함께 준비합니다. 조건 충족과 핵심어 포함법을 반복 훈련합니다.' },
+        { icon:'📚', title:'오답 분석 루틴', desc:'틀린 문제를 그냥 넘기지 않습니다. 오답 원인을 파악하고 같은 실수를 반복하지 않도록 관리합니다.' },
+        { icon:'🎯', title:'시험 전 집중 관리', desc:'중간·기말 2~3주 전부터 시험 범위를 집중 정리하고 최종 점검합니다.' },
+      ],
+      [
+        { icon:'📝', title:'단원별 핵심 정리', desc:'시험 범위의 핵심 개념을 단원별로 정리합니다. 분량이 많아도 우선순위를 정해 효율적으로 준비합니다.' },
+        { icon:'📋', title:'수행평가 일정 관리', desc:'수행평가 마감을 미리 파악하고 준비 일정을 함께 잡습니다. 발표·보고서·실험 보고서 전 유형을 지도합니다.' },
+        { icon:'📚', title:'복습 루틴 형성', desc:'배운 내용을 잊지 않도록 복습 주기를 만들어드립니다. 시험 직전 몰아서 공부하는 악순환을 끊어드립니다.' },
+        { icon:'🎯', title:'취약 단원 보완', desc:'특히 약한 단원을 파악하고 집중적으로 보완합니다. 전체 점수를 끌어올리는 가장 효율적인 방법입니다.' },
+      ],
+    ][v];
     return `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">LEARNING GUIDE</span>
     <h2 class="sec-title">${location} 중등 과외 <em>학습 가이드</em></h2>
-    <p class="sec-desc">
-      중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다.
-      드림과외는 ${location} 학교별 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.
-    </p>
-    <div class="learning-grid">
-      <div class="learning-card">
-        <span class="learning-icon">📝</span>
-        <h3>내신 집중 대비</h3>
-        <p>학교별 기출 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">📋</span>
-        <h3>수행평가 관리</h3>
-        <p>서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">📚</span>
-        <h3>공부 방법 코칭</h3>
-        <p>과목별 효과적인 공부 방법을 알려드립니다. 오답 노트 활용과 복습 루틴을 함께 만들어드립니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">🎯</span>
-        <h3>자기주도학습</h3>
-        <p>선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.</p>
-      </div>
-    </div>
+    <p class="sec-desc">${intro}</p>
+    <div class="learning-grid">${cardsHtml(cards)}</div>
     ${subjectBlock}
   </div>
 </section>`;
   }
 
+  // ── 고등 ──
   if (grade === '고등') {
+    const intro = [
+      `고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다. 드림과외는 ${schoolRef} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.`,
+      `고등 내신은 수시 전형에 직결됩니다. 드림과외는 ${nearSchoolName ? nearSchoolName + '을 포함한 ' : ''}${location} 학교 출제 경향 분석과 수능 연계 학습을 함께 진행합니다.`,
+      `수능과 내신을 따로 준비하면 시간이 부족합니다. 드림과외는 ${location} 학교 내신을 수능 흐름에 맞게 연계해 통합 관리합니다.`,
+    ][v];
+    const cards = [
+      [
+        { icon:'🏫', title:'내신 + 수능 동시 대비', desc:'학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.' },
+        { icon:'🗂️', title:'학생부·수행평가 관리', desc:'학생부 기재 사항을 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 지도합니다.' },
+        { icon:'🎓', title:'입시 전략 안내', desc:'수시·정시 비중과 목표 대학에 맞는 학습 전략을 안내합니다. 진로에 따른 과목 선택도 함께 상담합니다.' },
+        { icon:'📊', title:'과목별 공부 방법', desc:'수능 연계 교재 활용법, 모의고사 분석, 오답 정리까지 체계적인 학습 방법을 함께 만들어갑니다.' },
+      ],
+      [
+        { icon:'🏫', title:'학교별 내신 분석', desc:`${nearSchoolName ? nearSchoolName + ' 등 ' : ''}${location} 고등학교의 출제 경향을 파악하고 빈출 유형을 집중적으로 준비합니다.` },
+        { icon:'🗂️', title:'수행평가·학생부', desc:'수행평가 주제 선정부터 작성, 발표까지 단계별로 지도합니다. 학생부 세특 활동과도 연계합니다.' },
+        { icon:'🎓', title:'수능 유형별 전략', desc:'수능 기출을 유형별로 분류하고 취약한 유형을 집중 훈련합니다. 모의고사 성적 분석도 함께 진행합니다.' },
+        { icon:'📊', title:'시험 일정 통합 관리', desc:'내신·수능·모의고사 일정을 통합해 월별 학습 계획을 세웁니다. 중요한 시험을 빠짐없이 준비합니다.' },
+      ],
+      [
+        { icon:'🏫', title:'내신·수능 통합 관리', desc:'내신과 수능이 겹치는 범위를 함께 학습합니다. 별도 준비 시간 없이 효율적으로 두 시험을 대비합니다.' },
+        { icon:'🗂️', title:'학생부 관리', desc:'수행평가, 세특, 동아리 등 학생부 전반을 관리합니다. 수시 전형에서 경쟁력 있는 학생부를 만들어드립니다.' },
+        { icon:'🎓', title:'입시 정보 안내', desc:'수시·정시 등 목표에 맞는 입시 경로를 안내합니다. 불필요한 혼란 없이 학습에 집중할 수 있도록 돕습니다.' },
+        { icon:'📊', title:'모의고사 분석', desc:'모의고사 결과를 과목별·유형별로 분석합니다. 어디서 점수를 더 올릴 수 있는지 구체적인 방향을 찾습니다.' },
+      ],
+    ][v];
     return `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">LEARNING GUIDE</span>
     <h2 class="sec-title">${location} 고등 과외 <em>학습 가이드</em></h2>
-    <p class="sec-desc">
-      고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다.
-      드림과외는 ${location} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.
-    </p>
-    <div class="learning-grid">
-      <div class="learning-card">
-        <span class="learning-icon">🏫</span>
-        <h3>내신 + 수능 동시 대비</h3>
-        <p>학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">🗂️</span>
-        <h3>학생부 · 수행평가 관리</h3>
-        <p>학생부 기재 사항을 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 지도합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">🎓</span>
-        <h3>입시 전략 안내</h3>
-        <p>수시·정시 비중과 목표 대학에 맞는 학습 전략을 안내합니다. 진로에 따른 과목 선택도 함께 상담합니다.</p>
-      </div>
-      <div class="learning-card">
-        <span class="learning-icon">📊</span>
-        <h3>과목별 공부 방법</h3>
-        <p>수능 연계 교재 활용법, 모의고사 분석, 오답 정리까지 체계적인 학습 방법을 함께 만들어갑니다.</p>
-      </div>
-    </div>
+    <p class="sec-desc">${intro}</p>
+    <div class="learning-grid">${cardsHtml(cards)}</div>
     ${subjectBlock}
   </div>
 </section>`;
   }
 
-  // 학년 미지정: 초등·중등·고등 전 학년 가이드 모두 표시
+  // ── 학년 미지정: 전 학년 가이드 ──
+  const allIntro = [
+    `드림과외는 초등부터 고등까지 학년별 특성에 맞는 1:1 맞춤 학습을 제공합니다. ${location} 학생의 현재 수준과 목표에 따라 최적의 커리큘럼을 구성합니다.`,
+    `${location} 학생이라면 학년과 목표에 따라 필요한 학습이 다릅니다. 드림과외는 초등 기초부터 고등 수능까지 단계별로 맞춤 지도합니다.`,
+    `학년마다 집중해야 할 포인트가 다릅니다. 드림과외는 ${location} 학생의 현재 학년과 약점을 파악해 가장 필요한 부분부터 채워드립니다.`,
+  ][v];
+  const midIntro = [
+    `중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다. 드림과외는 ${schoolRef} 학교별 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.`,
+    `중학교 때 내신을 잘 관리하면 고등학교 진학 후 선택의 폭이 넓어집니다. 드림과외는 ${location} 인근 학교 기출 경향에 맞춘 수업을 제공합니다.`,
+    `중등 내신은 지필고사와 수행평가 두 축을 모두 챙겨야 합니다. 드림과외는 ${location} 학교 일정에 맞춰 시험 전 집중 관리와 평소 수업을 병행합니다.`,
+  ][v];
+  const highIntro = [
+    `고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다. 드림과외는 ${schoolRef} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.`,
+    `고등 내신은 수시 전형에 직결됩니다. 드림과외는 ${location} 학교 출제 경향 분석과 수능 연계 학습을 함께 진행합니다.`,
+    `수능과 내신을 따로 준비하면 시간이 부족합니다. 드림과외는 ${location} 학교 내신을 수능 흐름에 맞게 연계해 통합 관리합니다.`,
+  ][v];
   return `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">LEARNING GUIDE</span>
     <h2 class="sec-title">${location} 과외 <em>학년별 학습 가이드</em></h2>
-    <p class="sec-desc">
-      드림과외는 초등부터 고등까지 학년별 특성에 맞는 1:1 맞춤 학습을 제공합니다.
-      ${location} 학생의 현재 수준과 목표에 따라 최적의 커리큘럼을 구성합니다.
-    </p>
-
+    <p class="sec-desc">${allIntro}</p>
     <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">🌱 초등 과외 — 기초와 학습 습관 형성</h3>
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">초등 시기는 학습 습관과 기초 학력의 토대를 만드는 중요한 단계입니다. 드림과외는 아이의 흥미를 살리면서 자기주도학습 능력을 함께 키워드립니다.</p>
     <div class="learning-grid" style="margin-bottom:32px">
@@ -861,18 +886,16 @@ function buildLearningSection(grade, subject, location) {
       <div class="learning-card"><span class="learning-icon">✏️</span><h3>수행평가 대비</h3><p>학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.</p></div>
       <div class="learning-card"><span class="learning-icon">😊</span><h3>과목 흥미 유발</h3><p>눈높이에 맞는 설명으로 과목에 흥미와 자신감을 심어드립니다. 싫어하는 과목도 재미있게 접근합니다.</p></div>
     </div>
-
     <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">📝 중등 과외 — 내신과 수행평가 집중 관리</h3>
-    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">중학교 내신은 고등학교 성적과 입시에 직접 영향을 미칩니다. 드림과외는 ${location} 학교별 출제 경향을 파악하고 체계적인 내신 관리를 도와드립니다.</p>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">${midIntro}</p>
     <div class="learning-grid" style="margin-bottom:32px">
       <div class="learning-card"><span class="learning-icon">📝</span><h3>내신 집중 대비</h3><p>학교별 기출 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.</p></div>
       <div class="learning-card"><span class="learning-icon">📋</span><h3>수행평가 관리</h3><p>서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.</p></div>
       <div class="learning-card"><span class="learning-icon">📚</span><h3>공부 방법 코칭</h3><p>과목별 효과적인 공부 방법을 알려드립니다. 오답 노트 활용과 복습 루틴을 함께 만들어드립니다.</p></div>
       <div class="learning-card"><span class="learning-icon">🎯</span><h3>자기주도학습</h3><p>선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.</p></div>
     </div>
-
     <h3 style="font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0 0 10px">🎓 고등 과외 — 내신·수능 동시 대비</h3>
-    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">고등학교는 내신과 수능을 동시에 준비하는 중요한 시기입니다. 드림과외는 ${location} 학교 내신부터 수능·입시 전략까지 체계적으로 관리해드립니다.</p>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;word-break:keep-all">${highIntro}</p>
     <div class="learning-grid">
       <div class="learning-card"><span class="learning-icon">🏫</span><h3>내신 + 수능 병행</h3><p>학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.</p></div>
       <div class="learning-card"><span class="learning-icon">🗂️</span><h3>학생부·수행평가 관리</h3><p>학생부 기재 사항을 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 지도합니다.</p></div>
@@ -886,9 +909,14 @@ function buildLearningSection(grade, subject, location) {
 
 // ── 헬퍼: 과목별 상세 학습법 섹션 ────────────────────────
 function buildSubjectStudySection(subject, location) {
+  const v = getVariant(location);
   const methods = {
     수학: {
-      intro: `수학은 개념 이해 없이 문제 풀이만 반복하면 실력이 쌓이지 않습니다. ${location} 드림과외 수학 선생님은 원리를 완전히 이해한 뒤 유형 훈련으로 연결하는 방식으로 지도합니다.`,
+      intros: [
+        `수학은 개념 이해 없이 문제 풀이만 반복하면 실력이 쌓이지 않습니다. ${location} 드림과외 수학 선생님은 원리를 완전히 이해한 뒤 유형 훈련으로 연결하는 방식으로 지도합니다.`,
+        `수학 점수가 오르지 않는 이유는 대부분 개념이 불완전하기 때문입니다. ${location} 드림과외는 공식을 외우기 전에 왜 그 공식이 나오는지 이해하는 수업을 합니다.`,
+        `문제를 많이 풀어도 개념이 없으면 유사 문제에서 또 막힙니다. ${location} 드림과외 수학 선생님은 개념 이해를 바탕으로 유형별 접근법을 함께 정리합니다.`,
+      ],
       items: [
         { icon: '📐', title: '개념 완전 이해', desc: '공식 암기가 아닌 원리 이해 중심 수업입니다. 왜 그런지 이해해야 응용 문제도 풀 수 있습니다.' },
         { icon: '📝', title: '유형별 반복 훈련', desc: '내신 출제 유형을 분류하고 각 유형을 반복 훈련합니다. 실수 없는 안정적인 점수 확보가 목표입니다.' },
@@ -897,7 +925,11 @@ function buildSubjectStudySection(subject, location) {
       ],
     },
     영어: {
-      intro: `영어는 단기간에 올리기 어렵지만, 올바른 방법으로 꾸준히 하면 점수가 반드시 오릅니다. ${location} 드림과외 영어 선생님은 어휘·독해·서술형을 균형 있게 지도합니다.`,
+      intros: [
+        `영어는 단기간에 올리기 어렵지만, 올바른 방법으로 꾸준히 하면 점수가 오릅니다. ${location} 드림과외 영어 선생님은 어휘·독해·서술형을 균형 있게 지도합니다.`,
+        `영어는 어휘와 구조를 함께 익혀야 읽기도 쓰기도 수월해집니다. ${location} 드림과외는 교과서 본문 분석부터 수능 유형까지 체계적으로 연결합니다.`,
+        `내신 영어와 수능 영어는 방향이 다릅니다. ${location} 드림과외 영어 선생님은 학생의 학년과 목표에 맞게 두 시험을 균형 있게 대비합니다.`,
+      ],
       items: [
         { icon: '📖', title: '어휘·문법 기초', desc: '교과서 핵심 어휘와 문법 사항을 정리합니다. 기초가 튼튼해야 독해와 서술형이 수월해집니다.' },
         { icon: '🔍', title: '독해 전략 훈련', desc: '문단 구조 파악, 주제·요지 찾기, 빈칸 추론 등 수능 독해 유형별 접근법을 익힙니다.' },
@@ -906,7 +938,11 @@ function buildSubjectStudySection(subject, location) {
       ],
     },
     국어: {
-      intro: `국어는 단순히 글을 읽는 과목이 아닙니다. ${location} 드림과외 국어 선생님은 독해 전략, 문학 분석, 서술형 답안 작성을 체계적으로 지도합니다.`,
+      intros: [
+        `국어는 단순히 글을 읽는 과목이 아닙니다. ${location} 드림과외 국어 선생님은 독해 전략, 문학 분석, 서술형 답안 작성을 체계적으로 지도합니다.`,
+        `국어는 문학, 비문학, 문법이 모두 시험에 나옵니다. ${location} 드림과외는 각 영역을 균형 있게 다루며 내신 서술형과 수능 국어를 함께 준비합니다.`,
+        `국어 점수는 감으로 푸는 게 아닙니다. ${location} 드림과외 국어 선생님은 지문 분석 방법과 답안 작성 전략을 체계적으로 훈련합니다.`,
+      ],
       items: [
         { icon: '📚', title: '문학 작품 분석', desc: '소설·시·수필의 주제, 표현 방식, 서술자 시점 등 내신 출제 포인트를 집중 정리합니다.' },
         { icon: '📄', title: '비문학 독해 전략', desc: '지문 구조 파악과 핵심 정보 추출 능력을 훈련합니다. 수능 비문학 유형도 함께 다룹니다.' },
@@ -915,7 +951,11 @@ function buildSubjectStudySection(subject, location) {
       ],
     },
     과학: {
-      intro: `과학은 개념과 원리를 이해한 뒤 실험·적용까지 연결해야 내신에서 좋은 점수를 받을 수 있습니다. ${location} 드림과외 과학 선생님은 물리·화학·생물·지구과학 전 분야를 지도합니다.`,
+      intros: [
+        `과학은 개념과 원리를 이해한 뒤 실험·적용까지 연결해야 내신에서 좋은 점수를 받을 수 있습니다. ${location} 드림과외 과학 선생님은 물리·화학·생물·지구과학 전 분야를 지도합니다.`,
+        `과학은 암기만으로는 응용 문제를 풀기 어렵습니다. ${location} 드림과외는 개념 원리 이해를 중심으로 실험·계산·서술형까지 폭넓게 지도합니다.`,
+        `수행평가 비중이 큰 과학은 실험 보고서 작성 능력도 중요합니다. ${location} 드림과외 과학 선생님은 개념 수업과 수행평가 준비를 함께 진행합니다.`,
+      ],
       items: [
         { icon: '⚗️', title: '핵심 개념 이해', desc: '암기보다 원리 이해 중심으로 개념을 잡습니다. 개념이 잡혀야 응용 문제도 풀 수 있습니다.' },
         { icon: '🔬', title: '실험·수행평가 대비', desc: '실험 보고서 작성법, 결론 도출 방법을 함께 준비합니다. 수행평가 배점이 큰 만큼 철저히 대비합니다.' },
@@ -924,7 +964,11 @@ function buildSubjectStudySection(subject, location) {
       ],
     },
     사회: {
-      intro: `사회는 방대한 내용을 체계적으로 정리하지 않으면 시험에서 실수가 잦습니다. ${location} 드림과외 사회 선생님은 개념 흐름 파악과 서술형 대비에 집중합니다.`,
+      intros: [
+        `사회는 방대한 내용을 체계적으로 정리하지 않으면 시험에서 실수가 잦습니다. ${location} 드림과외 사회 선생님은 개념 흐름 파악과 서술형 대비에 집중합니다.`,
+        `사회는 외울 내용이 많지만 흐름을 이해하면 훨씬 수월해집니다. ${location} 드림과외는 원인·결과 연결 중심으로 개념을 정리하고 서술형까지 대비합니다.`,
+        `사회 서술형은 핵심어를 포함한 완결된 문장이 요구됩니다. ${location} 드림과외 사회 선생님은 개념 학습과 답안 작성 훈련을 병행합니다.`,
+      ],
       items: [
         { icon: '🗺️', title: '개념 흐름 파악', desc: '단순 암기가 아닌 내용 간의 연결 관계를 파악합니다. 원인·결과 관계를 이해하면 기억에 오래 남습니다.' },
         { icon: '📰', title: '시사·현안 연계', desc: '교과 내용과 실제 사회 현상을 연결해 이해합니다. 수행평가 논술에도 도움이 됩니다.' },
@@ -933,7 +977,11 @@ function buildSubjectStudySection(subject, location) {
       ],
     },
     한국사: {
-      intro: `한국사는 시대별 흐름을 이해하지 않으면 내신과 수능 모두 어렵습니다. ${location} 드림과외 한국사 선생님은 연표 정리와 핵심 사건 중심으로 체계적으로 지도합니다.`,
+      intros: [
+        `한국사는 시대별 흐름을 이해하지 않으면 내신과 수능 모두 어렵습니다. ${location} 드림과외 한국사 선생님은 연표 정리와 핵심 사건 중심으로 체계적으로 지도합니다.`,
+        `한국사는 암기량이 많지만 시대별 흐름을 먼저 잡으면 훨씬 쉬워집니다. ${location} 드림과외는 전체 역사 흐름을 먼저 그린 뒤 세부 사건을 채워가는 방식으로 지도합니다.`,
+        `한국사 내신과 한국사능력검정시험을 함께 준비하면 효율적입니다. ${location} 드림과외 한국사 선생님은 두 시험을 통합한 학습 계획을 제공합니다.`,
+      ],
       items: [
         { icon: '⏳', title: '시대별 흐름 파악', desc: '선사시대부터 현대까지 시대별 핵심 사건과 흐름을 연표로 정리합니다. 전체 그림을 먼저 그립니다.' },
         { icon: '📌', title: '핵심 사건·인물 암기', desc: '시험에 자주 나오는 사건, 인물, 제도를 효율적으로 암기하는 전략을 제공합니다.' },
@@ -949,7 +997,7 @@ function buildSubjectStudySection(subject, location) {
   <div class="wrap">
     <span class="sec-label">STUDY METHOD</span>
     <h2 class="sec-title">${location} <em>${subject} 과외</em> 학습 방법</h2>
-    <p class="sec-desc">${m.intro}</p>
+    <p class="sec-desc">${m.intros[v]}</p>
     <div class="str-grid">
       ${m.items.map(item => `<div class="str-card">
         <span class="str-icon">${item.icon}</span>
@@ -962,37 +1010,42 @@ function buildSubjectStudySection(subject, location) {
 }
 
 // ── 헬퍼: 내신·수능·수행평가 가이드 섹션 ───────────────────
-function buildExamGuideSection(location) {
+function buildExamGuideSection(location, nearSchoolName = null) {
+  const v = getVariant(location);
+  const schoolRef = nearSchoolName || `${location} 인근`;
+  const intros = [
+    `드림과외는 정기고사, 수행평가, 수능까지 학생의 모든 시험을 함께 준비합니다. ${location} 학교 일정에 맞춰 체계적인 학습 계획을 수립합니다.`,
+    `시험마다 준비 방법이 다릅니다. 드림과외는 ${schoolRef} 학교의 내신 기출 경향을 파악하고, 학생 개개인의 일정에 맞는 준비 계획을 함께 세웁니다.`,
+    `내신과 수능을 따로 준비하면 시간이 부족합니다. 드림과외는 ${location} 학교 내신 범위와 수능 연계 내용을 통합해 효율적으로 관리합니다.`,
+  ];
+  const cardSets = [
+    [
+      { icon:'📋', title:'내신 기출 분석', desc:`${schoolRef} 학교의 기출 문제 유형과 출제 경향을 파악하고 단원별 핵심 문제를 집중적으로 다룹니다.` },
+      { icon:'✏️', title:'수행평가 완벽 준비', desc:'서술형·논술형 답안 작성법, 발표 준비, 실험 보고서 작성까지 수행평가의 모든 유형을 함께 대비합니다.' },
+      { icon:'🎯', title:'수능 연계 학습', desc:'내신과 수능이 겹치는 범위를 효율적으로 학습합니다. 수능 기출 유형 분석과 취약 영역 집중 보완을 진행합니다.' },
+      { icon:'📅', title:'시험 일정 관리', desc:'중간·기말고사, 수행평가, 모의고사 일정을 고려한 월별·주별 학습 계획을 선생님과 함께 수립합니다.' },
+    ],
+    [
+      { icon:'📋', title:'학교별 기출 대비', desc:`${nearSchoolName ? nearSchoolName + '을 포함한 ' : ''}${location} 학교 시험의 출제 패턴을 분석합니다. 자주 나오는 유형과 배점 높은 문제를 집중 준비합니다.` },
+      { icon:'✏️', title:'서술형·수행평가', desc:'서술형 답안 작성 방법과 수행평가 준비를 체계적으로 지도합니다. 조건 충족과 감점 포인트 관리에 집중합니다.' },
+      { icon:'🎯', title:'수능 기출 분석', desc:'수능 유형별 기출을 분석하고 취약한 영역을 집중적으로 보완합니다. 모의고사 성적 추이도 함께 관리합니다.' },
+      { icon:'📅', title:'월별 학습 계획', desc:'내신 시험과 수능 준비 일정을 함께 고려한 월별 계획을 세웁니다. 무엇을 언제 해야 할지 명확하게 정리합니다.' },
+    ],
+    [
+      { icon:'📋', title:'단원별 핵심 정리', desc:`${location} 학교 시험 범위의 핵심 개념을 단원별로 정리합니다. 분량이 많아도 우선순위를 정해 효율적으로 준비합니다.` },
+      { icon:'✏️', title:'수행평가 전 유형', desc:'발표·보고서·포트폴리오 등 모든 수행평가 유형을 지도합니다. 마감 전 여유 있게 완성할 수 있도록 일정을 관리합니다.' },
+      { icon:'🎯', title:'수능 연계 범위', desc:'교과서 내용 중 수능과 겹치는 범위를 먼저 완성합니다. 내신을 준비하면서 수능 기초도 함께 쌓을 수 있습니다.' },
+      { icon:'📅', title:'시험별 집중 기간', desc:'중간·기말 직전 2~3주를 집중 준비 기간으로 설정합니다. 평소 수업과 시험 대비 수업의 균형을 조율합니다.' },
+    ],
+  ];
   return `
 <section class="sec sec-bg">
   <div class="wrap">
     <span class="sec-label">EXAM GUIDE</span>
-    <h2 class="sec-title">${location} <em>내신·수능·수행평가</em> 완벽 대비</h2>
-    <p class="sec-desc">
-      드림과외는 정기고사, 수행평가, 수능까지 학생의 모든 시험을 함께 준비합니다.
-      ${location} 학교 일정에 맞춰 체계적인 학습 계획을 수립합니다.
-    </p>
+    <h2 class="sec-title">${location} <em>내신·수능·수행평가</em> 대비</h2>
+    <p class="sec-desc">${intros[v]}</p>
     <div class="str-grid">
-      <div class="str-card">
-        <span class="str-icon">📋</span>
-        <h3>내신 기출 분석</h3>
-        <p>${location} 인근 학교의 기출 문제 유형과 출제 경향을 파악하고 단원별 핵심 문제를 집중적으로 다룹니다.</p>
-      </div>
-      <div class="str-card">
-        <span class="str-icon">✏️</span>
-        <h3>수행평가 완벽 준비</h3>
-        <p>서술형·논술형 답안 작성법, 발표 준비, 실험 보고서 작성까지 수행평가의 모든 유형을 함께 대비합니다.</p>
-      </div>
-      <div class="str-card">
-        <span class="str-icon">🎯</span>
-        <h3>수능 연계 학습</h3>
-        <p>내신과 수능이 겹치는 범위를 효율적으로 학습합니다. 수능 기출 유형 분석과 취약 영역 집중 보완을 진행합니다.</p>
-      </div>
-      <div class="str-card">
-        <span class="str-icon">📅</span>
-        <h3>시험 일정 관리</h3>
-        <p>중간·기말고사, 수행평가, 모의고사 일정을 고려한 월별·주별 학습 계획을 선생님과 함께 수립합니다.</p>
-      </div>
+      ${cardSets[v].map(c => `<div class="str-card"><span class="str-icon">${c.icon}</span><h3>${c.title}</h3><p>${c.desc}</p></div>`).join('')}
     </div>
   </div>
 </section>`;
