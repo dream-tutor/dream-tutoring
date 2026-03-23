@@ -56,12 +56,30 @@ export default {
       });
     }
 
+    // 구 정적 HTML 파일 → Workers 한국어 URL로 301 리다이렉트
+    const HTML_REDIRECTS = {
+      '/gwangmyeong.html':              '/광명시과외',
+      '/gwangmyeong-dong-math.html':    '/광명동수학과외',
+      '/gwangmyeong-dong-english.html': '/광명동영어과외',
+      '/cheolsan-dong-math.html':       '/철산동수학과외',
+      '/cheolsan-dong-english.html':    '/철산동영어과외',
+      '/haan-dong-math.html':           '/하안동수학과외',
+      '/haan-dong-english.html':        '/하안동영어과외',
+      '/soha-dong-math.html':           '/소하동수학과외',
+      '/soha-dong-english.html':        '/소하동영어과외',
+      '/iljik-dong-math.html':          '/일직동수학과외',
+      '/iljik-dong-english.html':       '/일직동영어과외',
+    };
+    if (HTML_REDIRECTS[pathname]) {
+      return Response.redirect(SITE_URL + HTML_REDIRECTS[pathname], 301);
+    }
+
     // 홈페이지
     if (pathname === '/') {
       return new Response(renderHomePage(), {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
         },
       });
     }
