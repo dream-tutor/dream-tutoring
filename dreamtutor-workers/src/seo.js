@@ -16,6 +16,9 @@ export function buildHead({ title, description, url, type = 'local' }) {
 <meta property="og:url" content="${SITE_URL}${url}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${SITE_NAME}">
+<meta property="og:image" content="${SITE_URL}/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="naver-site-verification" content="051068c0a0ae6e9caf73755b32cd12430aed1803">
 <script type="application/ld+json">${JSON.stringify(schema)}</script>`.trim();
 }

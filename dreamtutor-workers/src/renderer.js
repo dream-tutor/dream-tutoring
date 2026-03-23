@@ -1466,3 +1466,229 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
   }
   return links.join('\n');
 }
+
+// ── 홈페이지 ─────────────────────────────────────────────
+export function renderHomePage() {
+  const title = '드림과외 | 전국 1:1 전문 과외 매칭';
+  const description = '초·중·고 전 과목 1:1 맞춤 과외. 검증된 선생님을 24시간 내 매칭. 방문·화상과외 모두 가능. 첫 30분 무료 체험. 전국 어디서나 드림과외.';
+  const url = '/';
+  const head = buildHead({ title, description, url, type: 'local' });
+
+  const body = `
+<style>
+/* ── 홈 전용 추가 CSS ── */
+.home-stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:32px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden}
+.home-stat{text-align:center;padding:18px 12px;border-right:1px solid rgba(255,255,255,.1)}
+.home-stat:last-child{border-right:none}
+.home-stat-num{display:block;font-family:"Gmarket Sans",sans-serif;font-size:24px;font-weight:700;color:#fff;line-height:1.1}
+.home-stat-num span{font-size:13px;color:var(--acc2)}
+.home-stat-label{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px;display:block}
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:40px}
+.subj-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;border:none;font-family:inherit;width:100%}
+.subj-card:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:var(--shadow-h);background:var(--white)}
+.subj-icon{font-size:32px;display:block;margin-bottom:10px}
+.subj-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.subj-desc{font-size:11px;color:var(--muted)}
+.rgn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:40px}
+.rgn-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center;text-decoration:none;transition:.2s;display:block}
+.rgn-card:hover{border-color:var(--acc);background:#EEF4FF;transform:translateY(-2px)}
+.rgn-icon{font-size:22px;display:block;margin-bottom:6px}
+.rgn-name{font-size:14px;font-weight:700;color:var(--ink)}
+.rgn-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.step-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:40px;position:relative}
+.step-grid::before{content:"";position:absolute;top:27px;left:12.5%;right:12.5%;height:1px;background:repeating-linear-gradient(90deg,var(--acc) 0,var(--acc) 8px,transparent 8px,transparent 18px);z-index:0}
+.step-item{text-align:center;padding:0 12px;position:relative;z-index:1}
+.step-circle{width:54px;height:54px;border-radius:50%;background:var(--bg);border:2px solid var(--acc);display:flex;align-items:center;justify-content:center;font-family:"Gmarket Sans",sans-serif;font-size:20px;font-weight:700;color:var(--acc);margin:0 auto 16px;box-shadow:0 0 0 6px var(--bg)}
+.step-item h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.step-item p{font-size:12px;color:var(--muted);line-height:1.68}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.rev-card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.rev-stars{color:var(--acc2);font-size:13px;letter-spacing:2px;margin-bottom:12px}
+.rev-text{font-size:13.5px;color:var(--ink);line-height:1.88;margin-bottom:16px;word-break:keep-all}
+.rev-author{display:flex;align-items:center;gap:10px;padding-top:14px;border-top:1px solid var(--border)}
+.rev-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Gmarket Sans",sans-serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.rev-name{font-size:13px;font-weight:700;color:var(--ink)}
+.rev-info{font-size:11px;color:var(--muted);margin-top:2px}
+@media(max-width:768px){
+  .home-stats{grid-template-columns:1fr 1fr}
+  .home-stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}
+  .home-stat:nth-child(odd){border-right:1px solid rgba(255,255,255,.1)}
+  .home-stat:nth-last-child(-n+2){border-bottom:none}
+  .subj-grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .subj-card{padding:16px 10px}
+  .subj-icon{font-size:26px;margin-bottom:8px}
+  .subj-name{font-size:13px}
+  .rgn-grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .step-grid{grid-template-columns:1fr 1fr;gap:28px 16px}
+  .step-grid::before{display:none}
+  .rev-grid{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+  .subj-grid{grid-template-columns:repeat(3,1fr)}
+  .rgn-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">📍 전국 서비스</div>
+    <h1 class="page-h1">내 아이에게 딱 맞는<br><em>선생님을 만나세요</em></h1>
+    <p class="page-desc">
+      지역·학교·과목에 맞는 검증된 전문 선생님을 연결해드립니다.<br>
+      초·중·고 전 과목 1:1 맞춤 과외. 방문·화상 모두 가능하며, 신청 후 24시간 내 매칭 완료.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
+      <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
+      <span class="hero-chip">✅ 24시간 내 매칭</span>
+      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      <span class="hero-chip">🏠 방문과외</span>
+      <span class="hero-chip">💻 화상과외</span>
+      <span class="hero-chip">📋 내신 전문</span>
+    </div>
+    <div class="home-stats">
+      <div class="home-stat"><span class="home-stat-num">30<span>년+</span></span><span class="home-stat-label">교육 노하우</span></div>
+      <div class="home-stat"><span class="home-stat-num">2,000<span>명+</span></span><span class="home-stat-label">전문 선생님</span></div>
+      <div class="home-stat"><span class="home-stat-num">100<span>만+</span></span><span class="home-stat-label">누적 회원</span></div>
+      <div class="home-stat"><span class="home-stat-num">24<span>시간</span></span><span class="home-stat-label">빠른 매칭</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- STRENGTH -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">OUR STRENGTH</span>
+    <h2 class="sec-title">드림과외를 <em>선택하는 이유</em></h2>
+    <p class="sec-desc">30년 교육 노하우와 검증된 선생님으로 확실한 성적 향상을 만들어드립니다.</p>
+    <div class="str-grid">
+      <div class="str-card"><span class="str-icon">📚</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>30년 이상 쌓아온 교육 경험으로 과목별 최적 커리큘럼 제공</p></div>
+      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>명+</span></div><h3>전문 선생님</h3><p>지역별·과목별 전문 선생님 다수 보유. 내신·수능 전문 튜터</p></div>
+      <div class="str-card"><span class="str-icon">👨‍👩‍👧</span><div class="str-num">100<span>만+</span></div><h3>누적 회원</h3><p>전국 학부모·학생이 선택한 과외 매칭 플랫폼</p></div>
+      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>시간</span></div><h3>빠른 매칭</h3><p>신청 후 24시간 이내 최적 선생님을 연결해드립니다</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBJECTS -->
+<section class="sec sec-bg" id="subjects">
+  <div class="wrap">
+    <span class="sec-label">SUBJECTS</span>
+    <h2 class="sec-title">전 과목 <em>1:1 맞춤</em> 과외</h2>
+    <p class="sec-desc">수학·영어부터 검정고시·코딩까지, 필요한 모든 과목을 커버합니다.</p>
+    <div class="subj-grid">
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔢</span><div class="subj-name">수학</div><div class="subj-desc">중·고등 전 과정</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔤</span><div class="subj-name">영어</div><div class="subj-desc">내신·수능·회화</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">📖</span><div class="subj-name">국어</div><div class="subj-desc">독서·문학·문법</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔬</span><div class="subj-name">과학</div><div class="subj-desc">물·화·생·지</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🌏</span><div class="subj-name">사회/역사</div><div class="subj-desc">내신 집중</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🎓</span><div class="subj-name">수능</div><div class="subj-desc">N수·재수 대비</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">📜</span><div class="subj-name">검정고시</div><div class="subj-desc">초·중·고 전문</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🗣️</span><div class="subj-name">영어 회화</div><div class="subj-desc">원어민·화상</div></button>
+      <button class="subj-card" onclick="openModal()"><span class="subj-icon">💻</span><div class="subj-name">코딩</div><div class="subj-desc">파이썬·앱·웹</div></button>
+    </div>
+  </div>
+</section>
+
+<!-- REGIONS -->
+<section class="sec sec-wh" id="regions">
+  <div class="wrap">
+    <span class="sec-label">REGIONS</span>
+    <h2 class="sec-title">지역별 <em>전문 과외</em></h2>
+    <p class="sec-desc">원하시는 지역을 선택하시면 해당 지역 전문 선생님을 안내해드립니다.<br>방문과외·화상과외 모두 가능하며 지역에 따라 서비스가 다를 수 있습니다.</p>
+    <div class="rgn-grid">
+      <a href="/서울과외" class="rgn-card"><span class="rgn-icon">🏙️</span><div class="rgn-name">서울</div><div class="rgn-sub">강동·송파·노원 등</div></a>
+      <a href="/경기과외" class="rgn-card"><span class="rgn-icon">🏘️</span><div class="rgn-name">경기</div><div class="rgn-sub">광명·수원·남양주 등</div></a>
+      <a href="/인천과외" class="rgn-card"><span class="rgn-icon">🌊</span><div class="rgn-name">인천</div><div class="rgn-sub">남동·연수 등</div></a>
+      <a href="/부산과외" class="rgn-card"><span class="rgn-icon">🌆</span><div class="rgn-name">부산</div><div class="rgn-sub">해운대·수영 등</div></a>
+      <a href="/대구과외" class="rgn-card"><span class="rgn-icon">🏛️</span><div class="rgn-name">대구</div><div class="rgn-sub">달서·수성 등</div></a>
+      <a href="/대전과외" class="rgn-card"><span class="rgn-icon">⚗️</span><div class="rgn-name">대전</div><div class="rgn-sub">서구 둔산동 등</div></a>
+      <a href="/광주과외" class="rgn-card"><span class="rgn-icon">🌿</span><div class="rgn-name">광주</div><div class="rgn-sub">광산구 수완동 등</div></a>
+      <a href="/울산과외" class="rgn-card"><span class="rgn-icon">⚓</span><div class="rgn-name">울산</div><div class="rgn-sub">중구 태화동 등</div></a>
+      <a href="/충북과외" class="rgn-card"><span class="rgn-icon">🌾</span><div class="rgn-name">충북</div><div class="rgn-sub">청주 가경·복대 등</div></a>
+      <a href="/충남과외" class="rgn-card"><span class="rgn-icon">🌻</span><div class="rgn-name">충남</div><div class="rgn-sub">천안·아산 등</div></a>
+      <a href="/전북과외" class="rgn-card"><span class="rgn-icon">🍀</span><div class="rgn-name">전북</div><div class="rgn-sub">전주 완산 등</div></a>
+      <a href="/경남과외" class="rgn-card"><span class="rgn-icon">🏞️</span><div class="rgn-name">경남</div><div class="rgn-sub">창원·진주 등</div></a>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted)">※ 방문과외는 지역별로 가능 여부가 다르며, 전국 화상과외는 어디서나 가능합니다.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="sec sec-bg" id="how">
+  <div class="wrap">
+    <span class="sec-label">HOW IT WORKS</span>
+    <h2 class="sec-title">딱 <em>4단계</em>로 시작하세요</h2>
+    <p class="sec-desc">복잡한 절차 없이 빠르고 간단하게 선생님을 만나보세요.</p>
+    <div class="step-grid">
+      <div class="step-item">
+        <div class="step-circle">1</div>
+        <h3>상담 신청</h3>
+        <p>이름·연락처·과목을 입력하고 무료 상담을 신청하세요</p>
+      </div>
+      <div class="step-item">
+        <div class="step-circle">2</div>
+        <h3>선생님 매칭</h3>
+        <p>24시간 내 지역·과목·학교에 맞는 최적 선생님 연결</p>
+      </div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+        <h3>무료 체험수업</h3>
+        <p>첫 수업 30분 무료 체험 후 선생님 수업 방식을 확인하세요</p>
+      </div>
+      <div class="step-item">
+        <div class="step-circle">4</div>
+        <h3>성적 향상</h3>
+        <p>체계적인 1:1 수업으로 확실한 성적 향상을 경험하세요</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="sec sec-wh" id="reviews">
+  <div class="wrap">
+    <span class="sec-label">REVIEWS</span>
+    <h2 class="sec-title">수강생 <em>생생 후기</em></h2>
+    <p class="sec-desc">드림과외를 경험한 학생과 학부모님의 실제 이야기입니다.</p>
+    <div class="rev-grid">
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <p class="rev-text">"3개월 만에 수학 점수가 62점에서 89점으로 올랐어요! 선생님이 학교 시험 경향을 정확히 파악하고 있어서 내신 대비에 특히 효과적이었습니다."</p>
+        <div class="rev-author">
+          <div class="rev-avatar" style="background:linear-gradient(135deg,#2563EB,#1e3a8a)">김</div>
+          <div><div class="rev-name">김○○ 학생 어머니</div><div class="rev-info">강남구 · 중3 · 수학</div></div>
+        </div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <p class="rev-text">"영어 내신 성적이 확 올랐어요! 우리 학교 기출 문제를 꿰뚫고 계신 선생님 덕분에 시험 준비가 훨씬 수월해졌습니다. 매칭도 하루 만에 돼서 너무 좋았어요."</p>
+        <div class="rev-author">
+          <div class="rev-avatar" style="background:linear-gradient(135deg,#F59E0B,#d97706)">박</div>
+          <div><div class="rev-name">박○○ 학생</div><div class="rev-info">서초구 · 고2 · 영어</div></div>
+        </div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <p class="rev-text">"수능 준비를 늦게 시작해서 걱정이 많았는데, 드림과외에서 연결해준 선생님 덕분에 6개월 만에 수학 4등급에서 2등급으로 올랐어요!"</p>
+        <div class="rev-author">
+          <div class="rev-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">이</div>
+          <div><div class="rev-name">이○○ 학생</div><div class="rev-info">노원구 · 고3 · 수학</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+${consultForm({
+  leftTitle: '지금 바로 <em>무료 상담</em> 신청하세요',
+  leftDesc: '전화 한 통, 폼 작성 한 번으로 내 아이에게 딱 맞는 선생님을 찾아드립니다.',
+  leftPts: ['신청 후 24시간 내 선생님 매칭', '첫 수업 30분 무료 체험', '학교·과목별 전문 선생님 연결', '부담 없이 선생님 교체 가능'],
+})}`;
+
+  return layout({ head, body, keyword: '전국과외', region: '' });
+}
