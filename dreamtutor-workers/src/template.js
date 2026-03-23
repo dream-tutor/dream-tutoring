@@ -422,6 +422,7 @@ function _footerHtml() {
       <span>© 2026 드림과외. All rights reserved.</span>
       <span>개인정보처리방침 · 이용약관</span>
     </div>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:rgba(255,255,255,.25)">광고 전화는 정중히 사절합니다.</div>
   </div>
 </footer>`;
 }
