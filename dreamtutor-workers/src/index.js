@@ -37,6 +37,20 @@ export default {
       return handleSitemapChunk(parseInt(chunkMatch[1], 10));
     }
 
+    // 파비콘
+    if (pathname === '/favicon.ico' || pathname === '/favicon.svg') {
+      const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#0D1B2A"/>
+  <text x="16" y="24" font-family="Georgia,serif" font-size="22" font-weight="700" fill="#F59E0B" text-anchor="middle">D</text>
+</svg>`;
+      return new Response(favicon, {
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'public, max-age=604800',
+        },
+      });
+    }
+
     // OG 이미지 동적 생성
     if (pathname === '/og-image.png') {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
