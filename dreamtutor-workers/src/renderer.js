@@ -1498,7 +1498,7 @@ export function renderHomePage() {
 .home-stat-num span{font-size:13px;color:var(--acc2)}
 .home-stat-label{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px;display:block}
 .subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:40px}
-.subj-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;border:none;font-family:inherit;width:100%}
+.subj-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block;font-family:inherit;width:100%;box-sizing:border-box}
 .subj-card:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:var(--shadow-h);background:var(--white)}
 .subj-icon{font-size:32px;display:block;margin-bottom:10px}
 .subj-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
@@ -1595,11 +1595,11 @@ export function renderHomePage() {
     <h2 class="sec-title">전 과목 <em>1:1 맞춤</em> 과외</h2>
     <p class="sec-desc">수학·영어부터 검정고시·코딩까지, 필요한 모든 과목을 커버합니다.</p>
     <div class="subj-grid">
-      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔢</span><div class="subj-name">수학</div><div class="subj-desc">중·고등 전 과정</div></button>
-      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔤</span><div class="subj-name">영어</div><div class="subj-desc">내신·수능·회화</div></button>
-      <button class="subj-card" onclick="openModal()"><span class="subj-icon">📖</span><div class="subj-name">국어</div><div class="subj-desc">독서·문학·문법</div></button>
-      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🔬</span><div class="subj-name">과학</div><div class="subj-desc">물·화·생·지</div></button>
-      <button class="subj-card" onclick="openModal()"><span class="subj-icon">🌏</span><div class="subj-name">사회/역사</div><div class="subj-desc">내신 집중</div></button>
+      <a href="/서울수학과외" class="subj-card"><span class="subj-icon">🔢</span><div class="subj-name">수학</div><div class="subj-desc">중·고등 전 과정</div></a>
+      <a href="/서울영어과외" class="subj-card"><span class="subj-icon">🔤</span><div class="subj-name">영어</div><div class="subj-desc">내신·수능·회화</div></a>
+      <a href="/서울국어과외" class="subj-card"><span class="subj-icon">📖</span><div class="subj-name">국어</div><div class="subj-desc">독서·문학·문법</div></a>
+      <a href="/서울과학과외" class="subj-card"><span class="subj-icon">🔬</span><div class="subj-name">과학</div><div class="subj-desc">물·화·생·지</div></a>
+      <a href="/서울사회과외" class="subj-card"><span class="subj-icon">🌏</span><div class="subj-name">사회/역사</div><div class="subj-desc">내신 집중</div></a>
       <button class="subj-card" onclick="openModal()"><span class="subj-icon">🎓</span><div class="subj-name">수능</div><div class="subj-desc">N수·재수 대비</div></button>
       <button class="subj-card" onclick="openModal()"><span class="subj-icon">📜</span><div class="subj-name">검정고시</div><div class="subj-desc">초·중·고 전문</div></button>
       <button class="subj-card" onclick="openModal()"><span class="subj-icon">🗣️</span><div class="subj-name">영어 회화</div><div class="subj-desc">원어민·화상</div></button>
@@ -1626,7 +1626,12 @@ export function renderHomePage() {
       <a href="/충북과외" class="rgn-card"><span class="rgn-icon">🌾</span><div class="rgn-name">충북</div><div class="rgn-sub">청주 가경·복대 등</div></a>
       <a href="/충남과외" class="rgn-card"><span class="rgn-icon">🌻</span><div class="rgn-name">충남</div><div class="rgn-sub">천안·아산 등</div></a>
       <a href="/전북과외" class="rgn-card"><span class="rgn-icon">🍀</span><div class="rgn-name">전북</div><div class="rgn-sub">전주 완산 등</div></a>
+      <a href="/전남과외" class="rgn-card"><span class="rgn-icon">🌸</span><div class="rgn-name">전남</div><div class="rgn-sub">목포·여수 등</div></a>
       <a href="/경남과외" class="rgn-card"><span class="rgn-icon">🏞️</span><div class="rgn-name">경남</div><div class="rgn-sub">창원·진주 등</div></a>
+      <a href="/경북과외" class="rgn-card"><span class="rgn-icon">🏯</span><div class="rgn-name">경북</div><div class="rgn-sub">포항·구미 등</div></a>
+      <a href="/강원과외" class="rgn-card"><span class="rgn-icon">🏔️</span><div class="rgn-name">강원</div><div class="rgn-sub">춘천·원주 등</div></a>
+      <a href="/세종과외" class="rgn-card"><span class="rgn-icon">🏛️</span><div class="rgn-name">세종</div><div class="rgn-sub">행정중심복합도시</div></a>
+      <a href="/제주과외" class="rgn-card"><span class="rgn-icon">🌺</span><div class="rgn-name">제주</div><div class="rgn-sub">제주시·서귀포</div></a>
     </div>
     <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted)">※ 방문과외는 지역별로 가능 여부가 다르며, 전국 화상과외는 어디서나 가능합니다.</p>
   </div>
