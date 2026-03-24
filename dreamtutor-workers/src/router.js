@@ -24,10 +24,17 @@ const SIGUNGU_DONG_MAP = {};
 // 중복 동 이름 집합 (sitemap에서 복합 URL 추가 생성용)
 const DUPLICATE_DONGS = new Set();
 
+// 중복 시군구 집합 및 시도+시군구 복합 맵 (동구·중구·서구 등 여러 시도에 동명 존재)
+const DUPLICATE_SIGUNGUS = new Set();
+const SIDO_SIGUNGU_MAP = {}; // 시도+시군구(접미사 조합) → {sido, sigungu}
+
 {
   const dongCount = {};
+  const sigunguCount = {};
   for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
     for (const [sigungu, dongs] of Object.entries(sigungus)) {
+      const sgKey = stripGuSuffix(sigungu);
+      sigunguCount[sgKey] = (sigunguCount[sgKey] || 0) + 1;
       for (const dong of dongs) {
         dongCount[dong] = (dongCount[dong] || 0) + 1;
         const sg0 = sigungu;
@@ -46,6 +53,22 @@ const DUPLICATE_DONGS = new Set();
   }
   for (const [dong, cnt] of Object.entries(dongCount)) {
     if (cnt > 1) DUPLICATE_DONGS.add(dong);
+  }
+  for (const [sgKey, cnt] of Object.entries(sigunguCount)) {
+    if (cnt > 1) DUPLICATE_SIGUNGUS.add(sgKey);
+  }
+  // 시도+시군구 복합 맵 구성
+  for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
+    for (const sigungu of Object.keys(sigungus)) {
+      const sg0 = sigungu;
+      const sg1 = stripGuSuffix(sigungu);
+      for (const sg of sg0 === sg1 ? [sg0] : [sg0, sg1]) {
+        const key = sido + sg;
+        if (!SIDO_SIGUNGU_MAP[key]) {
+          SIDO_SIGUNGU_MAP[key] = { sido, sigungu };
+        }
+      }
+    }
   }
 }
 
@@ -101,9 +124,9 @@ export function parseRoute(pathname) {
 
   if (!slug) return null;
 
-  // 동 매칭 (정확히 or 접미사 없는 버전)
+  // 동 매칭 (정확히 or 접미사 없는 버전, 2글자 동은 strip 매칭 제외)
   for (const dong of ALL_DONGS) {
-    if (slug === dong || slug === stripSuffix(dong)) {
+    if (slug === dong || (dong.length > 2 && slug === stripSuffix(dong))) {
       const gu = DONG_TO_GU[dong];
       const sido = DONG_TO_SIDO[dong];
       return {
@@ -113,9 +136,10 @@ export function parseRoute(pathname) {
     }
   }
 
-  // 시군구 매칭
+  // 시군구 매칭 (중복 시군구는 strip 매칭 제외)
   for (const gu of ALL_GUS) {
-    if (slug === gu || slug === stripGuSuffix(gu)) {
+    const isStrip = slug === stripGuSuffix(gu) && slug !== gu;
+    if (slug === gu || (isStrip && !DUPLICATE_SIGUNGUS.has(slug))) {
       const sido = Object.entries(VISIT_REGIONS).find(([, gus]) =>
         Object.keys(gus).includes(gu))?.[0];
       return {
@@ -163,18 +187,25 @@ export function parseRoute(pathname) {
     return { type: 'online', params: { level: 'sigungu', sido: sigunguSido, sigungu: slug, grade, subject } };
   }
   for (const [sigungu, sido] of Object.entries(ONLINE_SIGUNGU_MAP)) {
-    if (slug === stripGuSuffix(sigungu)) {
+    const stripped = stripGuSuffix(sigungu);
+    if (slug === stripped && !DUPLICATE_SIGUNGUS.has(stripped)) {
       return { type: 'online', params: { level: 'sigungu', sido, sigungu, grade, subject } };
     }
   }
 
-  // 동 매칭 - 방문과외 불가 지역도 포함 (정확히 or 접미사 없는 버전)
+  // 시도+시군구 복합 매칭 (중복 시군구 처리: /인천중구과외, /부산동구과외)
+  const sgInfo = SIDO_SIGUNGU_MAP[slug];
+  if (sgInfo) {
+    return { type: 'online', params: { level: 'sigungu', sido: sgInfo.sido, sigungu: sgInfo.sigungu, grade, subject } };
+  }
+
+  // 동 매칭 - 방문과외 불가 지역도 포함 (정확히 or 접미사 없는 버전, 2글자 동 strip 제외)
   const dongInfo = ONLINE_DONG_MAP[slug];
   if (dongInfo) {
     return { type: 'online', params: { level: 'dong', sido: dongInfo.sido, sigungu: dongInfo.sigungu, dong: slug, grade, subject } };
   }
   for (const [dong, info] of Object.entries(ONLINE_DONG_MAP)) {
-    if (slug === stripSuffix(dong)) {
+    if (dong.length > 2 && slug === stripSuffix(dong)) {
       return { type: 'online', params: { level: 'dong', sido: info.sido, sigungu: info.sigungu, dong, grade, subject } };
     }
   }
@@ -195,8 +226,10 @@ export function getAllRoutes() {
 
   for (const [sido, gus] of Object.entries(VISIT_REGIONS)) {
     for (const [gu, dongs] of Object.entries(gus)) {
-      // 시군구 레벨
-      for (const guSlug of suffixVariants(gu, stripGuSuffix)) {
+      // 시군구 레벨 (중복 시군구는 strip 버전 제외, 시도+시군구 복합 추가)
+      const guSlugs = DUPLICATE_SIGUNGUS.has(stripGuSuffix(gu))
+        ? [gu] : suffixVariants(gu, stripGuSuffix);
+      for (const guSlug of guSlugs) {
         routes.push(`/${guSlug}과외`);
         for (const grade of GRADE_KEYS) {
           routes.push(`/${guSlug}${grade}과외`);
@@ -205,10 +238,23 @@ export function getAllRoutes() {
           }
         }
       }
+      if (DUPLICATE_SIGUNGUS.has(stripGuSuffix(gu))) {
+        for (const sg of guSlugs) {
+          const combo = sido + sg;
+          routes.push(`/${combo}과외`);
+          for (const grade of GRADE_KEYS) {
+            routes.push(`/${combo}${grade}과외`);
+            for (const subject of SUBJECT_KEYS) {
+              routes.push(`/${combo}${grade}${subject}과외`);
+            }
+          }
+        }
+      }
 
-      // 동 레벨
+      // 동 레벨 (2글자 동은 strip 버전 제외)
       for (const dong of dongs) {
-        for (const dongSlug of suffixVariants(dong, stripSuffix)) {
+        const dongSlugs = dong.length > 2 ? suffixVariants(dong, stripSuffix) : [dong];
+        for (const dongSlug of dongSlugs) {
           routes.push(`/${dongSlug}과외`);
           for (const grade of GRADE_KEYS) {
             routes.push(`/${dongSlug}${grade}과외`);
@@ -254,9 +300,12 @@ export function getAllRoutes() {
   }
 
   // ALL_REGIONS 시군구 + 동 레벨 (방문과외 불가 지역 포함, 학년+과목 조합 추가)
-  for (const [, sigungus] of Object.entries(ALL_REGIONS)) {
+  for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
     for (const [sigungu, dongs] of Object.entries(sigungus)) {
-      for (const sigunguSlug of [sigungu, stripGuSuffix(sigungu)]) {
+      const strippedSg = stripGuSuffix(sigungu);
+      const sigunguSlugs = (sigungu === strippedSg || DUPLICATE_SIGUNGUS.has(strippedSg))
+        ? [sigungu] : [sigungu, strippedSg];
+      for (const sigunguSlug of sigunguSlugs) {
         routes.push(`/${sigunguSlug}과외`);
         for (const subject of SUBJECT_KEYS) {
           routes.push(`/${sigunguSlug}${subject}과외`);
@@ -268,8 +317,30 @@ export function getAllRoutes() {
           }
         }
       }
+
+      // 중복 시군구는 시도+시군구 복합 URL 추가 생성 (/인천중구과외, /부산동구과외)
+      if (DUPLICATE_SIGUNGUS.has(stripGuSuffix(sigungu))) {
+        for (const sg of sigunguSlugs) {
+          const combo = sido + sg;
+          routes.push(`/${combo}과외`);
+          for (const subject of SUBJECT_KEYS) {
+            routes.push(`/${combo}${subject}과외`);
+          }
+          for (const grade of GRADE_KEYS) {
+            routes.push(`/${combo}${grade}과외`);
+            for (const subject of SUBJECT_KEYS) {
+              routes.push(`/${combo}${grade}${subject}과외`);
+            }
+          }
+        }
+      }
+
       for (const dong of dongs) {
-        for (const dongSlug of [dong, stripSuffix(dong)]) {
+        // 2글자 동은 strip 버전 제외 (/중동과외는 생성, /중과외는 미생성)
+        const dongSlugs = dong.length > 2
+          ? (dong === stripSuffix(dong) ? [dong] : [dong, stripSuffix(dong)])
+          : [dong];
+        for (const dongSlug of dongSlugs) {
           routes.push(`/${dongSlug}과외`);
           for (const subject of SUBJECT_KEYS) {
             routes.push(`/${dongSlug}${subject}과외`);
@@ -285,7 +356,7 @@ export function getAllRoutes() {
         // 중복 동 이름은 시군구+동 복합 URL 추가 생성
         if (DUPLICATE_DONGS.has(dong)) {
           const strippedSigungu = stripGuSuffix(sigungu);
-          const strippedDong    = stripSuffix(dong);
+          const strippedDong    = dong.length > 2 ? stripSuffix(dong) : dong;
           for (const sg of sigungu === strippedSigungu ? [sigungu] : [sigungu, strippedSigungu]) {
             for (const d of dong === strippedDong ? [dong] : [dong, strippedDong]) {
               const combo = sg + d;
