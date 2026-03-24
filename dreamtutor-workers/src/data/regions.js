@@ -506,15 +506,31 @@ export const GRADES = {
 export const ONLINE_DONG_MAP = {};    // dong → { sido, sigungu }
 export const ONLINE_SIGUNGU_MAP = {}; // sigungu → sido (첫 번째 매핑 우선)
 
-for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
-  for (const [sigungu, dongs] of Object.entries(sigungus)) {
-    if (!ONLINE_SIGUNGU_MAP[sigungu]) {
-      ONLINE_SIGUNGU_MAP[sigungu] = sido;
-    }
-    for (const dong of dongs) {
-      if (!ONLINE_DONG_MAP[dong]) {
-        ONLINE_DONG_MAP[dong] = { sido, sigungu };
+// 여러 시도에 동일 이름이 존재하는 시군구 집합 (중구·동구·서구 등)
+export const DUPLICATE_SIGUNGUS = new Set();
+
+{
+  const sigunguCount = {};
+  for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
+    for (const [sigungu, dongs] of Object.entries(sigungus)) {
+      const key = stripGuSuffix(sigungu);
+      sigunguCount[key] = (sigunguCount[key] || 0) + 1;
+      if (!ONLINE_SIGUNGU_MAP[sigungu]) {
+        ONLINE_SIGUNGU_MAP[sigungu] = sido;
+      }
+      for (const dong of dongs) {
+        if (!ONLINE_DONG_MAP[dong]) {
+          ONLINE_DONG_MAP[dong] = { sido, sigungu };
+        }
       }
     }
   }
+  for (const [key, cnt] of Object.entries(sigunguCount)) {
+    if (cnt > 1) DUPLICATE_SIGUNGUS.add(key);
+  }
+}
+
+// 시군구 URL 슬러그 반환 (중복 시군구는 시도 접두어 포함)
+export function sigunguSlug(sido, sigungu) {
+  return DUPLICATE_SIGUNGUS.has(stripGuSuffix(sigungu)) ? sido + sigungu : sigungu;
 }

@@ -2,7 +2,8 @@ import {
   VISIT_REGIONS, DONG_TO_GU, DONG_TO_SIDO,
   stripSuffix, stripGuSuffix,
   SUBJECTS, GRADES, ALL_SIDO,
-  ALL_REGIONS, ONLINE_DONG_MAP, ONLINE_SIGUNGU_MAP
+  ALL_REGIONS, ONLINE_DONG_MAP, ONLINE_SIGUNGU_MAP,
+  DUPLICATE_SIGUNGUS,
 } from './data/regions.js';
 import { SCHOOL_TO_LOCATION } from './data/schools.js';
 
@@ -24,17 +25,13 @@ const SIGUNGU_DONG_MAP = {};
 // 중복 동 이름 집합 (sitemap에서 복합 URL 추가 생성용)
 const DUPLICATE_DONGS = new Set();
 
-// 중복 시군구 집합 및 시도+시군구 복합 맵 (동구·중구·서구 등 여러 시도에 동명 존재)
-const DUPLICATE_SIGUNGUS = new Set();
-const SIDO_SIGUNGU_MAP = {}; // 시도+시군구(접미사 조합) → {sido, sigungu}
+// 시도+시군구 복합 맵 (중복 시군구 처리: /인천중구과외 → {sido:'인천', sigungu:'중구'})
+const SIDO_SIGUNGU_MAP = {};
 
 {
   const dongCount = {};
-  const sigunguCount = {};
   for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
     for (const [sigungu, dongs] of Object.entries(sigungus)) {
-      const sgKey = stripGuSuffix(sigungu);
-      sigunguCount[sgKey] = (sigunguCount[sgKey] || 0) + 1;
       for (const dong of dongs) {
         dongCount[dong] = (dongCount[dong] || 0) + 1;
         const sg0 = sigungu;
@@ -49,17 +46,7 @@ const SIDO_SIGUNGU_MAP = {}; // 시도+시군구(접미사 조합) → {sido, si
           }
         }
       }
-    }
-  }
-  for (const [dong, cnt] of Object.entries(dongCount)) {
-    if (cnt > 1) DUPLICATE_DONGS.add(dong);
-  }
-  for (const [sgKey, cnt] of Object.entries(sigunguCount)) {
-    if (cnt > 1) DUPLICATE_SIGUNGUS.add(sgKey);
-  }
-  // 시도+시군구 복합 맵 구성
-  for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
-    for (const sigungu of Object.keys(sigungus)) {
+      // 시도+시군구 복합 맵 구성
       const sg0 = sigungu;
       const sg1 = stripGuSuffix(sigungu);
       for (const sg of sg0 === sg1 ? [sg0] : [sg0, sg1]) {
@@ -69,6 +56,9 @@ const SIDO_SIGUNGU_MAP = {}; // 시도+시군구(접미사 조합) → {sido, si
         }
       }
     }
+  }
+  for (const [dong, cnt] of Object.entries(dongCount)) {
+    if (cnt > 1) DUPLICATE_DONGS.add(dong);
   }
 }
 

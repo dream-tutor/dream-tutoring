@@ -1,6 +1,6 @@
 import { buildHead, buildFAQSchema } from './seo.js';
 import { layout, ctaBox, faqSection, consultForm } from './template.js';
-import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP } from './data/regions.js';
+import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP, sigunguSlug } from './data/regions.js';
 import { DONG_SCHOOLS } from './data/schools.js';
 
 const PHONE_LINK = '01048645345';
@@ -1429,7 +1429,8 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
     <p class="sec-desc">아래 지역을 선택하시면 해당 시군구 전문 선생님을 안내해드립니다.</p>
     <div class="card-grid">
       ${sigungus.map(sg => {
-        const slug = subject ? `${sg}${subject}과외` : `${sg}과외`;
+        const sg_slug = sigunguSlug(sido, sg);
+        const slug = subject ? `${sg_slug}${subject}과외` : `${sg_slug}과외`;
         return `<div class="card"><a href="/${encodeURIComponent(slug)}">${sg} 과외</a></div>`;
       }).join('')}
     </div>
@@ -1439,13 +1440,17 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
   } else if (level === 'sigungu') {
     const dongs = ALL_REGIONS[sido]?.[sigungu] || [];
     if (dongs.length) {
+      const sg_slug = sigunguSlug(sido, sigungu);
       links.push(`
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">AREAS</span>
     <h2 class="sec-title">${sigungu} <em>동별 과외</em></h2>
     <p class="sec-desc">아래 동을 선택하시면 해당 지역 전문 선생님을 안내해드립니다.</p>
-    <div class="link-list" style="margin-bottom:16px"><a href="/${encodeURIComponent(sido + '과외')}">← ${sido} 과외 전체보기</a></div>
+    <div class="link-list" style="margin-bottom:16px">
+      <a href="/${encodeURIComponent(sido + '과외')}">← ${sido} 과외 전체보기</a>
+      <a href="/${encodeURIComponent(sg_slug + '과외')}">${sigungu} 과외 전체</a>
+    </div>
     <div class="card-grid">
       ${dongs.map(d => {
         const slug = subject ? `${d}${subject}과외` : `${d}과외`;
@@ -1456,6 +1461,7 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
 </section>`);
     }
   } else {
+    const sg_slug = sigunguSlug(sido, sigungu);
     links.push(`
 <section class="sec sec-wh">
   <div class="wrap">
@@ -1463,7 +1469,7 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
     <h2 class="sec-title">${dong} <em>관련 과외</em></h2>
     <p class="sec-desc">상위 지역 및 다른 과목별 과외 정보를 확인하세요.</p>
     <div class="link-list">
-      <a href="/${encodeURIComponent(sigungu + '과외')}">← ${sigungu} 과외 전체</a>
+      <a href="/${encodeURIComponent(sg_slug + '과외')}">← ${sigungu} 과외 전체</a>
       <a href="/${encodeURIComponent(sido + '과외')}">← ${sido} 과외 전체</a>
       ${subjectLinks}
     </div>
