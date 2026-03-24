@@ -1484,7 +1484,7 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
 // ── 홈페이지 ─────────────────────────────────────────────
 export function renderHomePage() {
   const title = '드림과외 | 전국 1:1 전문 과외 매칭';
-  const description = '초·중·고 전 과목 1:1 맞춤 과외. 검증된 선생님을 24시간 내 매칭. 방문·화상과외 모두 가능. 첫 30분 무료 체험. 전국 어디서나 드림과외.';
+  const description = '초·중·고 전 과목 1:1 맞춤 과외. 방문·화상 모두 가능. 검증된 선생님 24시간 내 매칭. 첫 30분 무료 체험.';
   const url = '/';
   const head = buildHead({ title, description, url, type: 'local' });
 
