@@ -1274,12 +1274,36 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
 </section>`;
 
   // 학년 섹션
+  const gradeCurriculumCards = {
+    초등: [
+      { icon: '📖', title: '기초 학력 완성', desc: '학교 교과서 단원을 빠짐없이 정리합니다. 모르는 부분을 즉시 바로잡아 학교 수업에 자신감을 갖게 해드립니다.' },
+      { icon: '🌱', title: '학습 습관 형성', desc: '스스로 예습·복습하는 루틴을 만들어드립니다. 숙제 관리와 공부 계획 세우기를 선생님과 함께 연습합니다.' },
+      { icon: '✏️', title: '수행평가 대비', desc: '학교별 수행평가 기준에 맞춰 과제, 발표, 보고서 작성을 꼼꼼히 준비합니다.' },
+      { icon: '😊', title: '흥미·자신감 유발', desc: '눈높이에 맞는 설명으로 과목에 흥미와 자신감을 심어드립니다. 어렵게 느껴지는 과목도 쉽게 접근합니다.' },
+    ],
+    중등: [
+      { icon: '📝', title: '내신 집중 대비', desc: '학교별 기출 경향 분석과 단원별 핵심 문제 유형을 집중적으로 다룹니다. 시험 전 2~3주 특별 관리를 제공합니다.' },
+      { icon: '📋', title: '서술형·수행평가 관리', desc: '서술형·논술형 답안 작성법과 실험 보고서, 발표 자료 준비를 체계적으로 지도합니다.' },
+      { icon: '📚', title: '오답 분석 루틴', desc: '틀린 문제를 그냥 넘기지 않습니다. 오답 원인을 파악하고 같은 실수를 반복하지 않도록 관리합니다.' },
+      { icon: '🎯', title: '자기주도학습 코칭', desc: '선생님 없이도 스스로 공부하는 힘을 기릅니다. 계획 세우기, 집중력 향상, 시험 관리까지 함께 합니다.' },
+    ],
+    고등: [
+      { icon: '🏫', title: '내신 + 수능 동시 대비', desc: '학교 교과서 기반 내신 대비와 수능 연계 학습을 병행합니다. 두 마리 토끼를 잡는 커리큘럼을 설계합니다.' },
+      { icon: '🗂️', title: '학생부·수행평가 관리', desc: '학생부 기재를 의식한 수행평가 준비와 세특(세부능력 및 특기사항) 활동을 단계별로 지도합니다.' },
+      { icon: '🎓', title: '입시 전략 안내', desc: '수시·정시 비중과 목표 대학에 맞는 학습 전략을 안내합니다. 진로에 따른 과목 선택도 함께 상담합니다.' },
+      { icon: '📊', title: '과목별 공부 방법', desc: '수능 연계 교재 활용법, 모의고사 분석, 오답 정리까지 체계적인 학습 방법을 함께 만들어갑니다.' },
+    ],
+  };
+  const gradeCurriculumHtml = (gradeCurriculumCards[grade] || []).map(c =>
+    `<div class="learning-card"><span class="learning-icon">${c.icon}</span><h3>${c.title}</h3><p>${c.desc}</p></div>`
+  ).join('');
   const gradeSection = gradeInfo ? `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">GRADE</span>
     <h2 class="sec-title">${gradeLabel} <em>맞춤 커리큘럼</em></h2>
     <p class="sec-desc">${gradeInfo.desc}. ${gradeInfo.detail}.</p>
+    ${gradeCurriculumHtml ? `<div class="learning-grid">${gradeCurriculumHtml}</div>` : ''}
   </div>
 </section>` : `
 <section class="sec sec-wh">
