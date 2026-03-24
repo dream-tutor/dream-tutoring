@@ -3,7 +3,7 @@ import {
   stripSuffix, stripGuSuffix,
   SUBJECTS, GRADES, ALL_SIDO,
   ALL_REGIONS, ONLINE_DONG_MAP, ONLINE_SIGUNGU_MAP,
-  DUPLICATE_SIGUNGUS, DUPLICATE_DONGS,
+  DUPLICATE_SIGUNGUS, DUPLICATE_DONGS, sigunguSlug,
 } from './data/regions.js';
 import { SCHOOL_TO_LOCATION } from './data/schools.js';
 
@@ -352,6 +352,34 @@ export function getAllRoutes() {
           }
         }
       }
+    }
+  }
+
+  return [...new Set(routes)];
+}
+
+// 핵심 페이지 경로 (sitemap-core.xml용, priority 0.9)
+// 시도 전체 조합 + 방문가능 시군구 base URL
+export function getCoreRoutes() {
+  const routes = [];
+
+  // 시도 레벨 (과목·학년 전체 조합)
+  for (const sido of ALL_SIDO) {
+    routes.push(`/${sido}과외`);
+    for (const s of SUBJECT_KEYS) routes.push(`/${sido}${s}과외`);
+    for (const g of GRADE_KEYS) {
+      routes.push(`/${sido}${g}과외`);
+      for (const s of SUBJECT_KEYS) routes.push(`/${sido}${g}${s}과외`);
+    }
+  }
+
+  // 방문가능 시군구 base URL (과목·학년 없이, 핵심 진입점만)
+  for (const [sido, gus] of Object.entries(VISIT_REGIONS)) {
+    for (const gu of Object.keys(gus)) {
+      const slug = sigunguSlug(sido, gu);
+      routes.push(`/${slug}과외`);
+      const alt = stripGuSuffix(slug);
+      if (alt !== slug && !DUPLICATE_SIGUNGUS.has(alt)) routes.push(`/${alt}과외`);
     }
   }
 

@@ -1,4 +1,4 @@
-import { buildHead, buildFAQSchema } from './seo.js';
+import { buildHead, buildFAQSchema, buildHomeSchema } from './seo.js';
 import { layout, ctaBox, faqSection, consultForm } from './template.js';
 import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP, sigunguSlug, dongSlug } from './data/regions.js';
 import { DONG_SCHOOLS } from './data/schools.js';
@@ -1486,7 +1486,11 @@ export function renderHomePage() {
   const title = '드림과외 | 전국 1:1 전문 과외 매칭';
   const description = '초·중·고 전 과목 1:1 맞춤 과외. 방문·화상 모두 가능. 검증된 선생님 24시간 내 매칭. 첫 30분 무료 체험.';
   const url = '/';
-  const head = buildHead({ title, description, url, type: 'local' });
+  const homeSchemas = buildHomeSchema();
+  const homeSchemaScripts = homeSchemas
+    .map(s => `<script type="application/ld+json">${JSON.stringify(s)}</script>`)
+    .join('');
+  const head = buildHead({ title, description, url, type: 'local' }) + homeSchemaScripts;
 
   const body = `
 <style>
@@ -1540,6 +1544,22 @@ export function renderHomePage() {
 @media(max-width:420px){
   .subj-grid{grid-template-columns:repeat(3,1fr)}
   .rgn-grid{grid-template-columns:repeat(3,1fr)}
+}
+/* 학년별 섹션 */
+.grade-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.grade-group{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px 20px}
+.grade-group h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--acc)}
+.grade-links{display:flex;flex-wrap:wrap;gap:8px}
+.grade-link{font-size:13px;color:var(--acc);text-decoration:none;background:#EEF4FF;border-radius:20px;padding:4px 12px;transition:.15s}
+.grade-link:hover{background:var(--acc);color:#fff}
+/* 인기 지역 섹션 */
+.hot-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+.hot-card{font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 18px;transition:.2s}
+.hot-card:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+@media(max-width:768px){
+  .grade-tabs{grid-template-columns:1fr}
+  .hot-grid{gap:8px}
+  .hot-card{font-size:13px;padding:8px 14px}
 }
 </style>
 
@@ -1668,8 +1688,90 @@ export function renderHomePage() {
   </div>
 </section>
 
+<!-- GRADES -->
+<section class="sec sec-bg" id="grades">
+  <div class="wrap">
+    <span class="sec-label">BY GRADE</span>
+    <h2 class="sec-title">학년별 <em>맞춤 과외</em></h2>
+    <p class="sec-desc">학년마다 다른 목표, 학년에 꼭 맞는 선생님을 연결해드립니다.</p>
+    <div class="grade-tabs">
+      <div class="grade-group">
+        <h3>🎒 초등 과외</h3>
+        <div class="grade-links">
+          <a href="/서울초등과외" class="grade-link">서울</a>
+          <a href="/경기초등과외" class="grade-link">경기</a>
+          <a href="/인천초등과외" class="grade-link">인천</a>
+          <a href="/부산초등과외" class="grade-link">부산</a>
+          <a href="/대구초등과외" class="grade-link">대구</a>
+          <a href="/대전초등과외" class="grade-link">대전</a>
+          <a href="/광주초등과외" class="grade-link">광주</a>
+          <a href="/울산초등과외" class="grade-link">울산</a>
+          <a href="/충북초등과외" class="grade-link">충북</a>
+          <a href="/충남초등과외" class="grade-link">충남</a>
+        </div>
+      </div>
+      <div class="grade-group">
+        <h3>📚 중등 과외</h3>
+        <div class="grade-links">
+          <a href="/서울중등과외" class="grade-link">서울</a>
+          <a href="/경기중등과외" class="grade-link">경기</a>
+          <a href="/인천중등과외" class="grade-link">인천</a>
+          <a href="/부산중등과외" class="grade-link">부산</a>
+          <a href="/대구중등과외" class="grade-link">대구</a>
+          <a href="/대전중등과외" class="grade-link">대전</a>
+          <a href="/광주중등과외" class="grade-link">광주</a>
+          <a href="/울산중등과외" class="grade-link">울산</a>
+          <a href="/충북중등과외" class="grade-link">충북</a>
+          <a href="/충남중등과외" class="grade-link">충남</a>
+        </div>
+      </div>
+      <div class="grade-group">
+        <h3>🎓 고등 과외</h3>
+        <div class="grade-links">
+          <a href="/서울고등과외" class="grade-link">서울</a>
+          <a href="/경기고등과외" class="grade-link">경기</a>
+          <a href="/인천고등과외" class="grade-link">인천</a>
+          <a href="/부산고등과외" class="grade-link">부산</a>
+          <a href="/대구고등과외" class="grade-link">대구</a>
+          <a href="/대전고등과외" class="grade-link">대전</a>
+          <a href="/광주고등과외" class="grade-link">광주</a>
+          <a href="/울산고등과외" class="grade-link">울산</a>
+          <a href="/충북고등과외" class="grade-link">충북</a>
+          <a href="/충남고등과외" class="grade-link">충남</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOT AREAS -->
+<section class="sec sec-wh" id="hot-areas">
+  <div class="wrap">
+    <span class="sec-label">HOT AREAS</span>
+    <h2 class="sec-title">인기 <em>과외 지역</em></h2>
+    <p class="sec-desc">수요가 많은 지역일수록 더 많은 전문 선생님이 대기 중입니다.</p>
+    <div class="hot-grid">
+      <a href="/대치동과외" class="hot-card">📍 대치동</a>
+      <a href="/잠실동과외" class="hot-card">📍 잠실동</a>
+      <a href="/목동과외" class="hot-card">📍 목동</a>
+      <a href="/상계동과외" class="hot-card">📍 상계동</a>
+      <a href="/신림동과외" class="hot-card">📍 신림동</a>
+      <a href="/반포동과외" class="hot-card">📍 반포동</a>
+      <a href="/고덕동과외" class="hot-card">📍 고덕동</a>
+      <a href="/철산동과외" class="hot-card">📍 철산동</a>
+      <a href="/하안동과외" class="hot-card">📍 하안동</a>
+      <a href="/분당과외" class="hot-card">📍 분당</a>
+      <a href="/일산과외" class="hot-card">📍 일산</a>
+      <a href="/평촌과외" class="hot-card">📍 평촌</a>
+      <a href="/해운대과외" class="hot-card">📍 해운대</a>
+      <a href="/수성구과외" class="hot-card">📍 수성구</a>
+      <a href="/둔산동과외" class="hot-card">📍 둔산동</a>
+    </div>
+  </div>
+</section>
+
 <!-- REVIEWS -->
-<section class="sec sec-wh" id="reviews">
+<section class="sec sec-bg" id="reviews">
   <div class="wrap">
     <span class="sec-label">REVIEWS</span>
     <h2 class="sec-title">수강생 <em>생생 후기</em></h2>

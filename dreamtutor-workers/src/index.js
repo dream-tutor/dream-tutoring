@@ -1,4 +1,4 @@
-import { parseRoute, getAllRoutes } from './router.js';
+import { parseRoute, getAllRoutes, getCoreRoutes } from './router.js';
 import { renderDongPage, renderGuPage, renderSidoPage, renderSchoolPage, renderOnlinePage, renderHomePage } from './renderer.js';
 
 const SITE_URL = 'https://dreamtutor.kr';
@@ -7,6 +7,7 @@ const CHUNK_SIZE = 45000;
 // 모듈 초기화 시 1회 계산 (Workers 시작 CPU 시간, 요청당 제한 없음)
 const ALL_ROUTES = getAllRoutes();
 const CHUNK_COUNT = Math.ceil(ALL_ROUTES.length / CHUNK_SIZE);
+const CORE_ROUTES = getCoreRoutes();
 
 export default {
   async fetch(request, env, ctx) {
@@ -29,6 +30,11 @@ export default {
     // 사이트맵 인덱스
     if (pathname === '/sitemap-seo.xml') {
       return handleSitemapIndex();
+    }
+
+    // 핵심 페이지 사이트맵 (시도+방문가능 시군구, priority 0.9)
+    if (pathname === '/sitemap-core.xml') {
+      return handleCoreSitemap();
     }
 
     // 청크별 사이트맵 /sitemap-seo-1.xml ~ /sitemap-seo-N.xml
@@ -132,15 +138,35 @@ export default {
   },
 };
 
+// 핵심 사이트맵 - 시도+방문가능 시군구 (priority 0.9)
+function handleCoreSitemap() {
+  const today = new Date().toISOString().split('T')[0];
+  const urls = CORE_ROUTES.map(r =>
+    `<url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`
+  ).join('');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`;
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
+}
+
 // 사이트맵 인덱스 - 청크 목록만 반환 (빠름)
 function handleSitemapIndex() {
   const today = new Date().toISOString().split('T')[0];
+  const coreSitemap = `<sitemap><loc>${SITE_URL}/sitemap-core.xml</loc><lastmod>${today}</lastmod></sitemap>`;
   const sitemaps = Array.from({ length: CHUNK_COUNT }, (_, i) =>
     `<sitemap><loc>${SITE_URL}/sitemap-seo-${i + 1}.xml</loc><lastmod>${today}</lastmod></sitemap>`
   ).join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${coreSitemap}
 ${sitemaps}
 </sitemapindex>`;
 
@@ -163,7 +189,7 @@ function handleSitemapChunk(chunkNum) {
   const today = new Date().toISOString().split('T')[0];
 
   const urls = chunk.map(r =>
-    `<url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`
+    `<url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`
   ).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
