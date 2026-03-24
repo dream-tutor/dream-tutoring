@@ -236,16 +236,17 @@ export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
 
   const dongs = ALL_REGIONS[sido]?.[gu] || [];
 
+  const guBase = sigunguSlug(sido, gu);
   const subjectLinks = Object.entries(SUBJECTS).map(([s, info]) =>
-    `<a href="/${encodeURIComponent(displayGu + s + '과외')}">${subjectEmoji(info)} ${displayGu} ${s}과외</a>`
+    `<a href="/${encodeURIComponent(guBase + s + '과외')}">${subjectEmoji(info)} ${displayGu} ${s}과외</a>`
   ).join('');
 
-  const gradeLinks = Object.entries(GRADES).map(([g, info]) =>
-    `<a href="/${encodeURIComponent(displayGu + g + '과외')}">${displayGu} ${g}과외</a>`
+  const gradeLinks = Object.entries(GRADES).map(([g]) =>
+    `<a href="/${encodeURIComponent(guBase + g + '과외')}">${displayGu} ${g}과외</a>`
   ).join('');
 
   const dongCards = dongs.map(d => {
-    const ds = stripSuffix(d);
+    const ds = dongSlug(gu, d);
     return `<div class="card">
   <a href="/${encodeURIComponent(ds + (subject || '') + '과외')}">${d} ${subject || ''}과외</a>
 </div>`;
@@ -364,8 +365,8 @@ export function renderSidoPage({ sido, grade, subject }) {
   const gus = VISIT_REGIONS[sido] ? Object.keys(VISIT_REGIONS[sido]) : [];
   const allGus = ALL_REGIONS[sido] ? Object.keys(ALL_REGIONS[sido]) : [];
   const allGuCards = allGus.map(gu => {
-    const gd = stripGuSuffix(gu);
-    return `<div class="card"><a href="/${encodeURIComponent(gd + (subject || '') + '과외')}">${gu} ${subject || ''}과외</a></div>`;
+    const gs = sigunguSlug(sido, gu);
+    return `<div class="card"><a href="/${encodeURIComponent(gs + (subject || '') + '과외')}">${gu} ${subject || ''}과외</a></div>`;
   }).join('');
 
   const subjectLinks = Object.entries(SUBJECTS).map(([s, info]) =>
