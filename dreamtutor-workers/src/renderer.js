@@ -1,6 +1,6 @@
 import { buildHead, buildFAQSchema } from './seo.js';
 import { layout, ctaBox, faqSection, consultForm } from './template.js';
-import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP, sigunguSlug } from './data/regions.js';
+import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP, sigunguSlug, dongSlug } from './data/regions.js';
 import { DONG_SCHOOLS } from './data/schools.js';
 
 const PHONE_LINK = '01048645345';
@@ -1453,7 +1453,8 @@ function buildOnlineNavLinks({ level, sido, sigungu, dong, subject }) {
     </div>
     <div class="card-grid">
       ${dongs.map(d => {
-        const slug = subject ? `${d}${subject}과외` : `${d}과외`;
+        const ds = dongSlug(sigungu, d);
+        const slug = subject ? `${ds}${subject}과외` : `${ds}과외`;
         return `<div class="card"><a href="/${encodeURIComponent(slug)}">${d} 과외</a></div>`;
       }).join('')}
     </div>

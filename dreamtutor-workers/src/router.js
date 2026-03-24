@@ -3,7 +3,7 @@ import {
   stripSuffix, stripGuSuffix,
   SUBJECTS, GRADES, ALL_SIDO,
   ALL_REGIONS, ONLINE_DONG_MAP, ONLINE_SIGUNGU_MAP,
-  DUPLICATE_SIGUNGUS,
+  DUPLICATE_SIGUNGUS, DUPLICATE_DONGS,
 } from './data/regions.js';
 import { SCHOOL_TO_LOCATION } from './data/schools.js';
 
@@ -22,18 +22,15 @@ const GRADE_KEYS = Object.keys(GRADES);
 // 키: sigungu+dong 의 4가지 접미사 조합, 값: {sido, sigungu, dong}
 const SIGUNGU_DONG_MAP = {};
 
-// 중복 동 이름 집합 (sitemap에서 복합 URL 추가 생성용)
-const DUPLICATE_DONGS = new Set();
+
 
 // 시도+시군구 복합 맵 (중복 시군구 처리: /인천중구과외 → {sido:'인천', sigungu:'중구'})
 const SIDO_SIGUNGU_MAP = {};
 
 {
-  const dongCount = {};
   for (const [sido, sigungus] of Object.entries(ALL_REGIONS)) {
     for (const [sigungu, dongs] of Object.entries(sigungus)) {
       for (const dong of dongs) {
-        dongCount[dong] = (dongCount[dong] || 0) + 1;
         const sg0 = sigungu;
         const sg1 = stripGuSuffix(sigungu);
         const d0  = dong;
@@ -56,9 +53,6 @@ const SIDO_SIGUNGU_MAP = {};
         }
       }
     }
-  }
-  for (const [dong, cnt] of Object.entries(dongCount)) {
-    if (cnt > 1) DUPLICATE_DONGS.add(dong);
   }
 }
 
