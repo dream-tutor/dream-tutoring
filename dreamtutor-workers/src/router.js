@@ -106,6 +106,7 @@ export function parseRoute(pathname) {
     }
   }
 
+  if (!slug && subject && !grade && !isOnline) return { type: 'subject', params: { subject } };
   if (!slug) return null;
 
   // 동 매칭 (정확히 or 접미사 없는 버전, 2글자 동은 strip 매칭 제외)

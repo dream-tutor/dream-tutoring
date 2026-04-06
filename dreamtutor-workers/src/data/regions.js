@@ -76,8 +76,9 @@ export function stripSuffix(name) {
   return name.replace(/(동|면|읍|리)$/, '');
 }
 
-// 시군구 "시/구/군" 접미사 제거
+// 시군구 "시/구/군" 접미사 제거 (동·서·남·북·중구는 단독으로 의미 없으므로 유지)
 export function stripGuSuffix(name) {
+  if (/^[동서남북중]구$/.test(name)) return name;
   return name.replace(/(시|구|군)$/, '');
 }
 

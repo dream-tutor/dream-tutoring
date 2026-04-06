@@ -114,6 +114,14 @@ a{color:inherit;text-decoration:none}
 .link-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .link-list a{color:var(--acc);font-size:12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.15);border-radius:8px;padding:5px 14px;transition:.15s;white-space:nowrap}
 .link-list a:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* SCHOOL LINKS */
+.school-link-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;margin-bottom:4px}
+.school-link{color:var(--acc);font-size:12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.15);border-radius:8px;padding:5px 12px;text-decoration:none;transition:.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.school-link:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+.school-type{font-size:10px;font-weight:700;background:rgba(0,0,0,.08);border-radius:4px;padding:1px 4px;margin-left:2px}
+.school-group{margin-top:24px}
+.school-group-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.school-count{font-size:12px;font-weight:400;color:var(--muted)}
 /* CARD GRID */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:16px}
 .card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;transition:.15s}
@@ -186,6 +194,25 @@ footer{background:var(--ink);padding:48px 0 24px}
 .learning-method ul{list-style:none;display:flex;flex-direction:column;gap:8px}
 .learning-method li{font-size:13px;color:var(--muted);padding-left:20px;position:relative;line-height:1.7}
 .learning-method li::before{content:"✓";position:absolute;left:0;color:var(--acc);font-weight:700}
+/* CHECK LIST - 카드 대신 체크리스트 */
+.check-list{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:28px}
+.check-list li{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--ink);line-height:1.75;word-break:keep-all}
+.check-list li::before{content:"✓";flex-shrink:0;width:22px;height:22px;background:var(--acc);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px}
+.check-list strong{color:var(--ink);font-weight:700}
+/* STUDY STEPS - 과목별 학습법 */
+.study-steps{display:flex;flex-direction:column;gap:0;margin-top:28px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.study-step{display:flex;align-items:flex-start;gap:20px;padding:20px 24px;border-bottom:1px solid var(--border);background:var(--white)}
+.study-step:last-child{border-bottom:none}
+.study-step:nth-child(odd){background:var(--bg)}
+.step-badge{flex-shrink:0;width:36px;height:36px;background:var(--acc);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:"Gmarket Sans",sans-serif;font-size:14px;font-weight:700}
+.study-step h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.study-step p{font-size:13px;color:var(--muted);line-height:1.75;word-break:keep-all}
+/* INFO BLOCK - 지역 정보 텍스트 블록 */
+.info-block{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:28px 28px;margin-top:24px}
+.info-block p{font-size:14px;color:var(--ink);line-height:1.9;word-break:keep-all;margin-bottom:14px}
+.info-block p:last-child{margin-bottom:0}
+.info-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.info-tag{display:inline-flex;align-items:center;gap:5px;background:#EEF4FF;color:var(--acc);border:1px solid rgba(37,99,235,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600}
 /* MOBILE */
 @media(max-width:768px){
   /* 헤더 */
@@ -351,6 +378,15 @@ export function layout({ head, body, breadcrumb = [], keyword = '', region = '' 
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5R81Y8FGFR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5R81Y8FGFR');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 ${head}

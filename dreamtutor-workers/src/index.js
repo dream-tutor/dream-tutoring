@@ -1,8 +1,9 @@
 import { parseRoute, getAllRoutes, getCoreRoutes } from './router.js';
-import { renderDongPage, renderGuPage, renderSidoPage, renderSchoolPage, renderOnlinePage, renderHomePage } from './renderer.js';
+import { renderDongPage, renderGuPage, renderSidoPage, renderSchoolPage, renderOnlinePage, renderHomePage, renderSubjectPage } from './renderer.js';
 
 const SITE_URL = 'https://dreamtutor.kr';
 const CHUNK_SIZE = 45000;
+const INDEXNOW_KEY = 'f7e8d9c0b1a29347e85f0d1c2b3a4956';
 
 // 모듈 초기화 시 1회 계산 (Workers 시작 CPU 시간, 요청당 제한 없음)
 const ALL_ROUTES = getAllRoutes();
@@ -13,6 +14,16 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname;
+
+    // IndexNow 키 파일 (인증용)
+    if (pathname === `/${INDEXNOW_KEY}.txt`) {
+      return new Response(INDEXNOW_KEY, {
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
 
     // robots.txt
     if (pathname === '/robots.txt') {
@@ -120,6 +131,8 @@ export default {
         html = renderSchoolPage(route.params);
       } else if (route.type === 'online') {
         html = renderOnlinePage(route.params);
+      } else if (route.type === 'subject') {
+        html = renderSubjectPage(route.params);
       } else {
         return new Response(null, { status: 404 });
       }

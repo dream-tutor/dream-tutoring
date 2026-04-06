@@ -6,9 +6,8 @@
 - 한국어 URL 기반 (/고덕동수학과외 등)
 
 ## 현재 상태
-- 총 18,199개 페이지 생성 중
-- 화상과외: 10,675개
-- 방문과외 + 학교: 7,524개
+- 총 383,059개 페이지 생성 중 (2026-03-24 기준)
+- 전국 행정구역 데이터 확장 반영 후 수치
 
 ## 파일 구조
 - src/index.js: Workers 메인 엔트리
@@ -27,6 +26,4 @@
 - Google Apps Script URL: https://script.google.com/macros/s/AKfycbysEqIGSI9Dz4h4jup9Rn72KBNuuCObBifH_wAPSePhHt3wMe4RDBOxlwupxmrPeXqVjw/exec
 
 ## 다음 작업
-- 전국 행정구역 데이터 확장 (ALL_REGIONS)
-- 학교 페이지 전국 확장
 - sitemap-seo.xml 최종 제출
