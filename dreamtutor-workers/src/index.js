@@ -105,6 +105,17 @@ export default {
       return Response.redirect(SITE_URL + HTML_REDIRECTS[pathname], 301);
     }
 
+    // trailing slash 301 리다이렉트 (/ 제외, 중복 페이지 방지)
+    if (pathname !== '/' && pathname.endsWith('/')) {
+      const clean = pathname.replace(/\/+$/, '');
+      return Response.redirect(`${SITE_URL}${clean}${url.search}`, 301);
+    }
+
+    // www → non-www 301 리다이렉트
+    if (url.hostname === 'www.dreamtutor.kr') {
+      return Response.redirect(`${SITE_URL}${pathname}${url.search}`, 301);
+    }
+
     // 홈페이지
     if (pathname === '/') {
       return new Response(renderHomePage(), {
@@ -151,11 +162,16 @@ export default {
   },
 };
 
+// 사이트맵용 URL 인코딩 (한글 경로를 percent-encode)
+function encodeSitemapUrl(route) {
+  return SITE_URL + '/' + encodeURIComponent(route.slice(1));
+}
+
 // 핵심 사이트맵 - 시도+방문가능 시군구 (priority 0.9)
 function handleCoreSitemap() {
   const today = new Date().toISOString().split('T')[0];
   const urls = CORE_ROUTES.map(r =>
-    `<url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`
+    `<url><loc>${encodeSitemapUrl(r)}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`
   ).join('');
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -202,7 +218,7 @@ function handleSitemapChunk(chunkNum) {
   const today = new Date().toISOString().split('T')[0];
 
   const urls = chunk.map(r =>
-    `<url><loc>${SITE_URL}${r}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`
+    `<url><loc>${encodeSitemapUrl(r)}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>`
   ).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -53,6 +53,7 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
     .flatMap(g => Object.values(g).flat()).includes(dong);
 
   const keyword = `${displayDong}${grade || ''}${subject || ''}과외`;
+  const canonicalKeyword = `${dong}${grade || ''}${subject || ''}과외`;
   const title = `${keyword} | 1:1 전문 드림과외`;
   const description = [
     `${displayDong} ${grade || '초중고'} ${subject || '전과목'} 과외 전문.`,
@@ -60,7 +61,7 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
     `검증된 선생님 24시간 내 매칭. 첫 30분 무료 체험.`,
   ].join(' ');
 
-  const url = `/${encodeURIComponent(keyword)}`;
+  const url = `/${encodeURIComponent(canonicalKeyword)}`;
   const head = buildHead({ title, description, url, type: isVisit ? 'local' : 'online' });
 
   const faqs = buildFAQs({ dong: displayDong, gu, grade, subject, isVisit });
@@ -300,10 +301,11 @@ ${consultForm({
 export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
   const displayGu = withSuffix ? gu : stripGuSuffix(gu);
   const keyword = `${displayGu}${grade || ''}${subject || ''}과외`;
+  const canonicalKeyword = `${gu}${grade || ''}${subject || ''}과외`;
   const title = `${keyword} | 드림과외`;
   const description = `${displayGu} ${grade || '초중고'} ${subject || '전과목'} 과외. 방문·화상 모두 가능. 검증된 선생님 24시간 매칭. 첫 30분 무료 체험.`;
 
-  const url = `/${encodeURIComponent(keyword)}`;
+  const url = `/${encodeURIComponent(canonicalKeyword)}`;
   const head = buildHead({ title, description, url, type: 'local' });
 
   const dongs = ALL_REGIONS[sido]?.[gu] || [];
@@ -1398,8 +1400,8 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
   const head = buildHead({
     title:       `${pageTitle} | 드림과외`,
     description: pageDesc,
-    canonical:   `/${encodeURIComponent(keyword)}`,
-    keywords:    `${displayName} 과외, ${displayName} 화상과외, ${displayName} 온라인과외, ${subjectLabel} 과외`,
+    url:         `/${encodeURIComponent(keyword)}`,
+    type:        isVisit ? 'local' : 'online',
   });
 
   // WHY 섹션
