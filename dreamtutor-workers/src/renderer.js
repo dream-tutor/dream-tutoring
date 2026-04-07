@@ -1452,6 +1452,9 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
 
   const serviceText = isVisit ? '방문·화상과외' : '화상과외';
 
+  // 복합 해시키 (유사도 분산용)
+  const hashKey = (dong || '') + (sigungu || '') + (sido || '') + (subject || '');
+
   if (level === 'dong') {
     displayName = dong;
     linkSlug    = dongSlug(sigungu, dong);
@@ -1480,18 +1483,36 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
     type:        isVisit ? 'local' : 'online',
   });
 
-  // WHY 섹션
+  // WHY 섹션 (해시 변형)
+  const vWhy = getVariant(hashKey, 0, 8);
+  const whyDescs = [
+    `${displayName} 학생의 현재 수준에 맞는 검증된 선생님을 직접 골라 연결합니다. 학교 내신 기출 경향을 파악한 선생님이 1:1로 지도합니다.`,
+    `좋은 과외는 '누가 가르치느냐'에서 시작합니다. 드림과외 선생님은 ${displayName} 학생의 약점부터 정확히 짚어드립니다.`,
+    `성적이 오르지 않는 데는 이유가 있습니다. 드림과외는 ${displayName} 학생의 개념 구멍과 학습 방법을 동시에 잡아드립니다.`,
+    `혼자 공부하는 것과 1:1로 배우는 것은 속도가 다릅니다. 드림과외 선생님이 ${displayName} 학생에게 최단 경로를 안내합니다.`,
+    `처음 과외를 시작하는 분도 걱정 마세요. 드림과외가 ${displayName} 학생에게 딱 맞는 선생님을 직접 검토해서 추천해드립니다.`,
+    `검증 없는 선생님은 위험합니다. 드림과외는 학력·경력·수업 능력을 직접 확인한 선생님만 ${displayName} 학생에게 연결합니다.`,
+    `선생님이 바뀌면 성적이 달라집니다. 드림과외는 ${displayName} 학생과 딱 맞는 선생님을 찾을 때까지 함께합니다.`,
+    `30년간 쌓인 교육 노하우를 바탕으로 ${displayName} 학생에게 맞는 맞춤 커리큘럼을 설계합니다. ${serviceText}로 편리하게 수업하세요.`,
+  ];
+  const strCardDescs = [
+    [`${displayName} 학생 지도 경험을 바탕으로 과목별 최적 커리큘럼을 설계합니다.`, `전국 학부모가 검증한 교육 플랫폼입니다.`, `과목·학년별 전문 선생님이 1:1 맞춤 수업을 진행합니다.`, `신청 후 24시간 이내 전문 선생님을 연결합니다.`],
+    [`수능부터 내신까지 체계적 관리. ${displayName} 맞춤 수업.`, `100만 명 이상이 함께한 신뢰도 높은 플랫폼.`, `${displayName} 학생 맞춤 선생님이 직접 지도합니다.`, `빠른 매칭으로 수업 공백을 최소화합니다.`],
+    [`교과서 중심 내신 대비부터 심화까지 체계적으로 관리합니다.`, `오랜 경험이 만든 검증된 교육 서비스입니다.`, `학생 수준에 맞는 선생님을 직접 선별합니다.`, `지역 제한 없이 ${displayName} 학생에게 맞춤 매칭.`],
+    [`학교 기출 경향을 반영한 맞춤 수업을 제공합니다.`, `학부모 만족도가 높은 전국 규모 플랫폼입니다.`, `내신·수능 통합 관리가 가능한 선생님을 배정합니다.`, `상담 당일 선생님 추천이 가능합니다.`],
+  ];
+  const strCards = strCardDescs[vWhy % 4];
   const onlineFeatures = `
 <section class="sec sec-wh">
   <div class="wrap">
     <span class="sec-label">WHY DREAMTUTOR</span>
     <h2 class="sec-title">${displayName} <em>드림과외</em> 특징</h2>
-    <p class="sec-desc">이동 없이 집에서 전국 최고 수준의 선생님과 1:1 맞춤 수업을 받으세요.</p>
+    <p class="sec-desc">${whyDescs[vWhy]}</p>
     <div class="str-grid">
-      <div class="str-card"><span class="str-icon">🏆</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>30년+ 교육 현장 경험으로 과목별 최적 커리큘럼 제공. 수능부터 내신까지 체계적 관리.</p></div>
-      <div class="str-card"><span class="str-icon">👥</span><div class="str-num">100<span>만+</span></div><h3>누적 회원수</h3><p>전국 100만 명 이상의 학생과 학부모가 드림과외와 함께한 교육 플랫폼입니다.</p></div>
-      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>+</span></div><h3>전문 선생님</h3><p>각 과목·학년별 전문 선생님이 1:1 맞춤 수업을 진행합니다.</p></div>
-      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>h</span></div><h3>빠른 매칭</h3><p>신청 후 24시간 이내 전문 선생님을 연결합니다. 지역 제한 없이 맞춤 매칭.</p></div>
+      <div class="str-card"><span class="str-icon">🏆</span><div class="str-num">30<span>년+</span></div><h3>교육 노하우</h3><p>${strCards[0]}</p></div>
+      <div class="str-card"><span class="str-icon">👥</span><div class="str-num">100<span>만+</span></div><h3>누적 회원수</h3><p>${strCards[1]}</p></div>
+      <div class="str-card"><span class="str-icon">👩‍🏫</span><div class="str-num">2,000<span>+</span></div><h3>전문 선생님</h3><p>${strCards[2]}</p></div>
+      <div class="str-card"><span class="str-icon">⚡</span><div class="str-num">24<span>h</span></div><h3>빠른 매칭</h3><p>${strCards[3]}</p></div>
     </div>
   </div>
 </section>`;
@@ -1591,10 +1612,12 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
   <div class="wrap page-hero-in">
     <div class="region-badge">${level === 'dong' ? `📍 ${sido} · ${sigungu}` : level === 'sigungu' ? `📍 ${sido}` : '🌐 전국 서비스'}</div>
     <h1 class="page-h1">${displayName}<em>${subject || ''}과외</em>${grade ? `&nbsp;${grade}` : ''}</h1>
-    <p class="page-desc">
-      ${pageDesc}
-      상담 신청 후 24시간 내 매칭, 첫 30분 무료 체험.
-    </p>
+    <p class="page-desc">${[
+      `${pageDesc} 상담 신청 후 24시간 내 매칭, 첫 30분 무료 체험.`,
+      `${displayName} ${subjectLabel} ${gradeLabel} 과외를 찾고 계신가요? 드림과외가 검증된 선생님을 24시간 내 연결해드립니다. 첫 30분 무료 체험.`,
+      `${displayName} 학생의 성적 향상을 위해 경험 있는 전문 선생님을 매칭합니다. 상담 후 24시간 내 연결, 첫 30분 무료.`,
+      `성적이 제자리라면 맞는 선생님을 아직 못 만난 겁니다. 드림과외가 ${displayName} ${subjectLabel} 전문 선생님을 연결합니다.`,
+    ][getVariant(hashKey, 8, 4)]}</p>
     <div class="hero-btns">
       <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
       <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
@@ -1612,9 +1635,10 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
 </section>
 ${onlineFeatures}
 ${subjectSection}
-${buildLearningSection(grade, subject, displayName)}
-${buildSubjectStudySection(subject, displayName)}
-${buildExamGuideSection(displayName)}
+${buildLearningSection(grade, subject, displayName, null, 4, hashKey)}
+${buildSubjectStudySection(subject, displayName, 5, hashKey)}
+${imageCallout(displayName, getVariant(hashKey, 7, 6) + 1, hashKey)}
+${buildExamGuideSection(displayName, null, 6, hashKey)}
 ${priceSection}
 ${gradeSection}
 ${navLinks}
@@ -1624,11 +1648,11 @@ ${consultForm({
   leftTitle: `<em>지금 바로</em> 무료 상담<br>신청하세요`,
   leftDesc: `${displayName} 전문 선생님을<br>24시간 내 연결해드립니다.`,
   leftPts: [
-    '상담 후 24시간 내 선생님 매칭',
-    '첫 30분 무료 체험',
-    '전 과목 1:1 맞춤 수업',
-    '맞춤 커리큘럼 제공',
-  ],
+    ['상담 후 24시간 내 선생님 매칭', '첫 30분 무료 체험', '전 과목 1:1 맞춤 수업', '맞춤 커리큘럼 제공'],
+    ['24시간 이내 최적 선생님 연결', '첫 수업 30분 무료', `${displayName} 전문 선생님 배정`, '언제든 선생님 교체 가능'],
+    ['당일 상담, 내일부터 수업 가능', '체험 후 결정 (무료 30분)', `${displayName} 맞춤 선생님`, '주 1~5회 유연한 일정'],
+    ['1:1 맞춤 커리큘럼 설계', '첫 30분 무료 체험', '내신·수능 통합 관리', '선생님 교체 부담 없음'],
+  ][getVariant(hashKey, 9, 4)],
   regionValue: displayName,
 })}
 `;
