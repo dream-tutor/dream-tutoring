@@ -9,6 +9,10 @@ routes = [
   { pattern = "www.dreamtutor.kr/*", zone_name = "dreamtutor.kr" }
 ]
 
+# 정적 파일 서빙 (이미지 등)
+[assets]
+directory = "./public"
+
 [build]
 command = ""
 

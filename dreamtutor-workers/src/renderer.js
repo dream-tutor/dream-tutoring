@@ -2,6 +2,7 @@ import { buildHead, buildFAQSchema, buildHomeSchema } from './seo.js';
 import { layout, ctaBox, faqSection, consultForm } from './template.js';
 import { SUBJECTS, GRADES, SIDO_DESC, VISIT_REGIONS, GU_DESC, DONG_DESC, stripSuffix, stripGuSuffix, ALL_REGIONS, ONLINE_DONG_MAP, sigunguSlug, dongSlug } from './data/regions.js';
 import { DONG_SCHOOLS, SCHOOL_TO_LOCATION } from './data/schools.js';
+import { EDU_ARTICLES } from './router.js';
 
 // 동·구 → 학교 목록 역방향 맵 (모듈 로드 시 1회 생성)
 // 중복 이름 충돌 방지: 동 키 = '시군구|동', 구 키 = '시도|시군구'
@@ -19,6 +20,46 @@ for (const [school, loc] of Object.entries(SCHOOL_TO_LOCATION)) {
 }
 
 const PHONE_LINK = '01048645345';
+
+// ── SVG 일러스트 배너 (깨지지 않는 인라인) ──────────────
+function tutoringImage(seed) {
+  const idx = ((seed - 1) % 6) + 1;
+  return `<section class="tutor-img-sec">
+  <img src="/images/tutoring${idx}.jpg" alt="드림과외 1:1 맞춤 수업" loading="lazy" width="1200" height="360">
+</section>`;
+}
+
+// ── 이미지 + 동기부여 메시지 콜아웃 (페이지 중간 삽입) ────
+function imageCallout(location, seed, hashKey = null) {
+  const imgIdx = ((seed - 1) % 6) + 1;
+  const v = getVariant(hashKey || location, seed + 10, 12);
+  const messages = [
+    { title: '공부의 방향을 잡는 것이<br>성적 향상의 시작입니다', desc: '드림과외 선생님이 학생에게 맞는 공부법을 찾아드립니다.' },
+    { title: '혼자 고민하지 마세요<br>전문가가 함께합니다', desc: '학습 상담부터 시험 대비까지, 드림과외가 동행합니다.' },
+    { title: '지금 시작하면<br>다음 시험이 달라집니다', desc: '미루지 마세요. 빠른 상담이 빠른 변화를 만듭니다.' },
+    { title: '아이의 가능성을<br>믿어주세요', desc: '좋은 선생님을 만나면 공부가 즐거워집니다.' },
+    { title: '매일 조금씩,<br>꾸준히 쌓이는 실력', desc: '1:1 과외로 매일 성장하는 우리 아이를 만나보세요.' },
+    { title: '시험 걱정,<br>이제 그만하셔도 됩니다', desc: '드림과외 선생님이 시험 대비를 책임져드립니다.' },
+    { title: '성적이 오르는 공부,<br>방법이 다릅니다', desc: '학생 맞춤 커리큘럼으로 효율적인 학습을 시작하세요.' },
+    { title: '우리 아이에게 딱 맞는<br>선생님이 있습니다', desc: '24시간 내 매칭, 첫 30분 무료 체험까지.' },
+    { title: '공부 습관이 바뀌면<br>결과가 달라집니다', desc: '드림과외 선생님과 함께 올바른 학습 습관을 만드세요.' },
+    { title: '빠른 상담 한 번이<br>1년을 바꿉니다', desc: '지금 연락 주시면 오늘 안에 상담해드립니다.' },
+    { title: '포기하기엔<br>아직 이릅니다', desc: '어떤 학생이든 맞는 방법이 있습니다. 드림과외가 찾아드립니다.' },
+    { title: '학원에서 안 되면<br>과외가 답입니다', desc: '1:1 맞춤 수업으로 부족한 부분만 집중 보완하세요.' },
+  ];
+  const msg = messages[v];
+  return `<section class="sec" style="padding:0">
+  <div class="wrap" style="padding:0 20px">
+    <div class="img-callout">
+      <img src="/images/tutoring${imgIdx}.jpg" alt="드림과외 학습 이미지" loading="lazy" width="1200" height="240">
+      <div class="img-callout-text">
+        <h3>${msg.title}</h3>
+        <p>${msg.desc}</p>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
 
 // ── 공통: 방문/화상 요금 텍스트 설명 ──────────────────
 function priceTableHtml(locationLabel, subject, isVisit) {
@@ -78,12 +119,13 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
     ? '방문과외·화상과외 모두 가능합니다.'
     : '화상과외로 집에서 편리하게 수업 받을 수 있습니다.';
 
-  // 각 섹션마다 독립 시드 → 섹션끼리 서로 다른 변형 번호를 가짐
-  const vH = getVariant(displayDong, 0, 12);  // hero desc
-  const vW = getVariant(displayDong, 1, 12);  // why desc
-  const vP = getVariant(displayDong, 2, 12);  // process desc
-  const vO = getVariant(displayDong, 3,  3);  // section order (3가지 순서)
-  const vC = getVariant(displayDong, 4, 12);  // cta / consult 포인트
+  // 복합키: 동+구+시도 → 같은 시군구 내 동끼리도 변형 분산
+  const hashKey = dong + gu + sido;
+  const vH = getVariant(hashKey, 0, 12);  // hero desc
+  const vW = getVariant(hashKey, 1, 12);  // why desc
+  const vP = getVariant(hashKey, 2, 12);  // process desc
+  const vO = getVariant(hashKey, 3,  3);  // section order (3가지 순서)
+  const vC = getVariant(hashKey, 4, 12);  // cta / consult 포인트
   const v  = vH; // buildLearningSection 등 기존 호환용
 
   const areaDesc = DONG_DESC[dong] || GU_DESC[gu] || `${gu}에 위치한 주거 지역입니다.`;
@@ -155,10 +197,15 @@ export function renderDongPage({ dong, gu, sido, grade, subject, withSuffix }) {
   const ctaPoints = ctaPointSets[vC];
 
   // 중간 섹션 순서 변형 (3가지 순서)
-  const _secA = buildLearningSection(grade, subject, displayDong, nearSchoolName, 4);
-  const _secB = buildSubjectStudySection(subject, displayDong, 5);
-  const _secC = buildExamGuideSection(displayDong, nearSchoolName, 6);
+  const _secA = buildLearningSection(grade, subject, displayDong, nearSchoolName, 4, hashKey);
+  const _secB = buildSubjectStudySection(subject, displayDong, 5, hashKey);
+  const _secC = buildExamGuideSection(displayDong, nearSchoolName, 6, hashKey);
   const midSections = vO === 0 ? [_secA, _secB, _secC] : vO === 1 ? [_secC, _secA, _secB] : [_secB, _secC, _secA];
+
+  // 이미지 번호 결정 (지역명 해시 기반, 1~6)
+  const imgIdx = ((dong.charCodeAt(0) + dong.charCodeAt(1)) % 6) + 1;
+  const imgIdx2 = (imgIdx % 6) + 1;
+  const imgIdx3 = (imgIdx2 % 6) + 1;
 
   const body = `
 <!-- PAGE HERO -->
@@ -257,6 +304,8 @@ ${buildLocalAreaSection(dong, displayDong, gu, nearSchoolName, isVisit)}
 
 ${midSections[0]}
 
+${imageCallout(displayDong, imgIdx2, hashKey)}
+
 ${midSections[1]}
 
 ${midSections[2]}
@@ -301,7 +350,8 @@ ${consultForm({
 export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
   const displayGu = withSuffix ? gu : stripGuSuffix(gu);
   const keyword = `${displayGu}${grade || ''}${subject || ''}과외`;
-  const canonicalKeyword = `${gu}${grade || ''}${subject || ''}과외`;
+  const guSlug = sigunguSlug(sido, gu);
+  const canonicalKeyword = `${guSlug}${grade || ''}${subject || ''}과외`;
   const title = `${keyword} | 드림과외`;
   const description = `${displayGu} ${grade || '초중고'} ${subject || '전과목'} 과외. 방문·화상 모두 가능. 검증된 선생님 24시간 매칭. 첫 30분 무료 체험.`;
 
@@ -335,6 +385,10 @@ export function renderGuPage({ gu, sido, grade, subject, withSuffix }) {
     { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있습니다.` },
   ];
   const faqSchema = buildFAQSchema(faqs);
+
+  const guImgIdx = ((gu.charCodeAt(0) + gu.charCodeAt(1)) % 6) + 1;
+  const guImgIdx2 = (guImgIdx % 6) + 1;
+  const guImgIdx3 = (guImgIdx2 % 6) + 1;
 
   const body = `
 <section class="page-hero">
@@ -401,11 +455,13 @@ ${dongs.length ? `<section class="sec sec-wh">
 
 ${buildGuSchoolSection(gu, displayGu, subject, sido)}
 
-${buildLearningSection(grade, subject, displayGu)}
+${buildLearningSection(grade, subject, displayGu, null, 4, gu + sido)}
 
-${buildSubjectStudySection(subject, displayGu)}
+${buildSubjectStudySection(subject, displayGu, 5, gu + sido)}
 
-${buildExamGuideSection(displayGu)}
+${imageCallout(displayGu, guImgIdx, gu + sido)}
+
+${buildExamGuideSection(displayGu, null, 6, gu + sido)}
 
 ${priceTableHtml(displayGu, subject, true)}
 
@@ -457,6 +513,10 @@ export function renderSidoPage({ sido, grade, subject }) {
     { q: `첫 수업이 정말 무료인가요?`, a: `네, 첫 30분은 무료 체험입니다. 선생님의 수업 방식을 직접 체험한 후 결정하실 수 있습니다.` },
   ];
   const faqSchema = buildFAQSchema(faqs);
+
+  const sidoImgIdx = ((sido.charCodeAt(0)) % 6) + 1;
+  const sidoImgIdx2 = (sidoImgIdx % 6) + 1;
+  const sidoImgIdx3 = (sidoImgIdx2 % 6) + 1;
 
   const body = `
 <section class="page-hero">
@@ -537,6 +597,8 @@ ${allGus.length ? `<section class="sec sec-wh">
 ${buildLearningSection(grade, subject, sido)}
 
 ${buildSubjectStudySection(subject, sido)}
+
+${imageCallout(sido, sidoImgIdx)}
 
 ${buildExamGuideSection(sido)}
 
@@ -804,16 +866,27 @@ ${consultForm({
 
 // ── 헬퍼: 지역명 기반 변형 인덱스 (독립 시드 지원) ──────────
 function getVariant(location, seed = 0, n = 12) {
-  let h = seed * 1009;
+  let h = 2166136261 ^ (seed * 2654435761);
   for (let i = 0; i < location.length; i++) {
-    h = (h + location.charCodeAt(i) * (i + 1) * (seed + 1)) & 0xFFFFFF;
+    const c = location.charCodeAt(i);
+    // 한글 유니코드를 2바이트로 분리해 해싱 (FNV-1a)
+    h ^= c & 0xFF;
+    h = Math.imul(h, 16777619);
+    h ^= (c >> 8) & 0xFF;
+    h = Math.imul(h, 16777619);
   }
-  return Math.abs(h) % n;
+  // murmur3 finalizer - 강한 혼합
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) % n;
 }
 
 // ── 헬퍼: 학습 콘텐츠 섹션 생성 ─────────────────────────
-function buildLearningSection(grade, subject, location, nearSchoolName = null, seed = 4) {
-  const v = getVariant(location, seed, 3);
+function buildLearningSection(grade, subject, location, nearSchoolName = null, seed = 4, hashKey = null) {
+  const v = getVariant(hashKey || location, seed, 3);
   const schoolRef = nearSchoolName || `${location} 인근`;
 
   const sm = subject ? {
@@ -996,8 +1069,8 @@ function buildLearningSection(grade, subject, location, nearSchoolName = null, s
 }
 
 // ── 헬퍼: 과목별 상세 학습법 섹션 ────────────────────────
-function buildSubjectStudySection(subject, location, seed = 5) {
-  const v = getVariant(location, seed, 3);
+function buildSubjectStudySection(subject, location, seed = 5, hashKey = null) {
+  const v = getVariant(hashKey || location, seed, 3);
   const methods = {
     수학: {
       intros: [
@@ -1097,8 +1170,8 @@ function buildSubjectStudySection(subject, location, seed = 5) {
 }
 
 // ── 헬퍼: 내신·수능·수행평가 가이드 섹션 ───────────────────
-function buildExamGuideSection(location, nearSchoolName = null, seed = 6) {
-  const v = getVariant(location, seed, 9);
+function buildExamGuideSection(location, nearSchoolName = null, seed = 6, hashKey = null) {
+  const v = getVariant(hashKey || location, seed, 9);
   const schoolRef = nearSchoolName || `${location} 인근`;
   const intros = [
     `드림과외는 정기고사, 수행평가, 수능까지 학생의 모든 시험을 함께 준비합니다. ${location} 학교 일정에 맞춰 체계적인 학습 계획을 수립합니다.`,
@@ -1365,8 +1438,8 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
   const subjectInfo = subject ? SUBJECTS[subject] : null;
   const gradeInfo   = grade   ? GRADES[grade]     : null;
 
-  // 표시용 지역명
-  let displayName, pageTitle, pageDesc;
+  // 표시용 지역명 + 링크용 slug (중복 시군구/동 처리)
+  let displayName, linkSlug, pageTitle, pageDesc;
   // 방문과외 가능 여부 판단
   let isVisit = false;
   if (level === 'dong' && dong) {
@@ -1381,14 +1454,17 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
 
   if (level === 'dong') {
     displayName = dong;
-    pageTitle   = `${dong}${grade || ''}${subject || ''}과외`;
+    linkSlug    = dongSlug(sigungu, dong);
+    pageTitle   = `${linkSlug}${grade || ''}${subject || ''}과외`;
     pageDesc    = `${dong} ${serviceText} 전문 선생님 연결. 1:1 맞춤 수업, 첫 30분 무료 체험.`;
   } else if (level === 'sigungu') {
     displayName = sigungu;
-    pageTitle   = `${sigungu}${grade || ''}${subject || ''}과외`;
+    linkSlug    = sigunguSlug(sido, sigungu);
+    pageTitle   = `${linkSlug}${grade || ''}${subject || ''}과외`;
     pageDesc    = `${sigungu} ${serviceText} 전문 선생님 연결. 1:1 맞춤 수업으로 성적 향상, 첫 30분 무료 체험.`;
   } else {
     displayName = sido;
+    linkSlug    = sido;
     pageTitle   = `${sido}${grade || ''}${subject || ''}과외`;
     pageDesc    = `${sido} ${serviceText} 전문 선생님 연결. 전 과목 1:1 맞춤 수업, 첫 30분 무료 체험.`;
   }
@@ -1420,7 +1496,7 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
   </div>
 </section>`;
 
-  // 과목 섹션
+  // 과목 섹션 (링크에 linkSlug 사용 - 중복 시군구/동 처리)
   const subjectSection = subjectInfo ? `
 <section class="sec sec-bg">
   <div class="wrap">
@@ -1429,7 +1505,7 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
     <p class="sec-desc">${subjectInfo.emoji} ${subjectInfo.desc} 전담 선생님을 연결해드립니다.</p>
     <div class="link-list">
       ${Object.entries(SUBJECTS).map(([s, info]) =>
-        `<a href="/${encodeURIComponent(displayName + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
+        `<a href="/${encodeURIComponent(linkSlug + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
       ).join('')}
     </div>
   </div>
@@ -1441,16 +1517,16 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
     <p class="sec-desc">수학·영어·국어·과학·사회·한국사 전 과목 1:1 맞춤 과외를 제공합니다.</p>
     <div class="link-list">
       ${Object.entries(SUBJECTS).map(([s, info]) =>
-        `<a href="/${encodeURIComponent(displayName + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
+        `<a href="/${encodeURIComponent(linkSlug + s + '과외')}">${info.emoji} ${displayName} ${s}과외</a>`
       ).join('')}
     </div>
   </div>
 </section>`;
 
-  // 학년 섹션
+  // 학년 섹션 (링크에 linkSlug 사용)
   const gradeSubjectLinks = gradeInfo
     ? Object.entries(SUBJECTS).map(([s, info]) =>
-        `<a href="/${encodeURIComponent(displayName + grade + s + '과외')}">${info.emoji} ${displayName} ${grade} ${s}과외</a>`
+        `<a href="/${encodeURIComponent(linkSlug + grade + s + '과외')}">${info.emoji} ${displayName} ${grade} ${s}과외</a>`
       ).join('')
     : '';
   const gradeSection = gradeInfo ? `
@@ -1469,7 +1545,7 @@ export function renderOnlinePage({ level, sido, sigungu, dong, grade, subject })
     <p class="sec-desc">초등·중등·고등 전 학년 맞춤 과외를 제공합니다.</p>
     <div class="link-list">
       ${Object.entries(GRADES).map(([g]) =>
-        `<a href="/${encodeURIComponent(displayName + g + '과외')}">📖 ${displayName} ${g}과외</a>`
+        `<a href="/${encodeURIComponent(linkSlug + g + '과외')}">📖 ${displayName} ${g}과외</a>`
       ).join('')}
     </div>
   </div>
@@ -1686,7 +1762,7 @@ export function renderHomePage() {
 .subj-desc{font-size:11px;color:var(--muted)}
 .rgn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:40px}
 .rgn-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center;text-decoration:none;transition:.2s;display:block}
-.rgn-card:hover{border-color:var(--acc);background:#EEF4FF;transform:translateY(-2px)}
+.rgn-card:hover{border-color:var(--acc);background:rgba(90,143,123,.04);transform:translateY(-2px)}
 .rgn-icon{font-size:22px;display:block;margin-bottom:6px}
 .rgn-name{font-size:14px;font-weight:700;color:var(--ink)}
 .rgn-sub{font-size:11px;color:var(--muted);margin-top:2px}
@@ -1727,7 +1803,7 @@ export function renderHomePage() {
 .grade-group{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px 20px}
 .grade-group h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--acc)}
 .grade-links{display:flex;flex-wrap:wrap;gap:8px}
-.grade-link{font-size:13px;color:var(--acc);text-decoration:none;background:#EEF4FF;border-radius:20px;padding:4px 12px;transition:.15s}
+.grade-link{font-size:13px;color:var(--acc);text-decoration:none;background:rgba(90,143,123,.06);border-radius:20px;padding:4px 12px;transition:.15s}
 .grade-link:hover{background:var(--acc);color:#fff}
 /* 인기 지역 섹션 */
 .hot-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
@@ -1735,14 +1811,14 @@ export function renderHomePage() {
 .hot-card:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
 /* 프로모 배너 섹션 */
 .promo-banner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.promo-visual svg{width:100%;max-width:420px;height:auto;display:block;filter:drop-shadow(0 8px 32px rgba(13,27,42,.12))}
+.promo-visual img{width:100%;max-width:420px;height:auto;display:block;border-radius:18px;object-fit:cover;box-shadow:0 8px 32px rgba(44,51,69,.12)}
 @media(max-width:768px){
   .grade-tabs{grid-template-columns:1fr}
   .hot-grid{gap:8px}
   .hot-card{font-size:13px;padding:8px 14px}
   .promo-banner{grid-template-columns:1fr;gap:28px}
   .promo-visual{order:-1}
-  .promo-visual svg{max-width:320px;margin:0 auto}
+  .promo-visual img{max-width:320px;margin:0 auto}
 }
 </style>
 
@@ -1750,23 +1826,22 @@ export function renderHomePage() {
 <section class="page-hero">
   <div class="wrap page-hero-in">
     <div class="region-badge">📍 전국 서비스</div>
-    <h1 class="page-h1">내 아이에게 딱 맞는<br><em>선생님을 만나세요</em></h1>
-    <p class="page-desc">
-      성적이 오르지 않는다면, 아직 맞는 선생님을 못 만난 겁니다.<br>
-      드림과외는 우리 아이 학교·과목·수준에 꼭 맞는 선생님을 직접 골라 연결해드립니다.<br>
-      방문·화상 모두 가능, 신청 다음날이면 수업이 시작됩니다.
-    </p>
+    <h1 class="page-h1">내 아이에게 딱 맞는 <em>선생님</em>을 만나세요</h1>
+    <ul class="hero-points">
+      <li>성적이 오르지 않는다면, 아직 맞는 선생님을 못 만난 겁니다.</li>
+      <li>학교·과목·수준에 꼭 맞는 선생님을 직접 골라 연결합니다.</li>
+      <li>방문·화상 모두 가능, 신청 다음날이면 수업이 시작됩니다.</li>
+    </ul>
     <div class="hero-btns">
       <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청하기</button>
       <a href="tel:${PHONE_LINK}" class="btn-hero-sub">📞 전화 상담</a>
     </div>
     <div class="hero-chips">
-      <span class="hero-chip">✅ 1:1 맞춤 수업</span>
-      <span class="hero-chip">✅ 24시간 내 매칭</span>
-      <span class="hero-chip">✅ 첫 30분 무료 체험</span>
+      <span class="hero-chip">✅ 1:1 맞춤</span>
+      <span class="hero-chip">✅ 24h 매칭</span>
+      <span class="hero-chip">✅ 무료 체험</span>
       <span class="hero-chip">🏠 방문과외</span>
       <span class="hero-chip">💻 화상과외</span>
-      <span class="hero-chip">📋 내신 전문</span>
     </div>
     <div class="home-stats">
       <div class="home-stat"><span class="home-stat-num">30<span>년+</span></span><span class="home-stat-label">교육 노하우</span></div>
@@ -1808,52 +1883,11 @@ export function renderHomePage() {
         </p>
         <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
           <button class="btn-hero-main" onclick="openModal()" style="font-size:14px;padding:12px 24px">✍️ 무료 상담 신청</button>
-          <a href="tel:${PHONE_LINK}" class="btn-hero-sub" style="font-size:14px;padding:12px 20px;background:rgba(13,27,42,.08);color:var(--ink);border-color:var(--border)">📞 전화 상담</a>
+          <a href="tel:${PHONE_LINK}" class="btn-hero-sub" style="font-size:14px;padding:12px 20px;background:rgba(90,143,123,.06);color:var(--ink);border-color:var(--border)">📞 전화 상담</a>
         </div>
       </div>
       <div class="promo-visual">
-        <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg" aria-label="드림과외 과외 수업 일러스트">
-          <!-- 배경 카드 -->
-          <rect x="20" y="20" width="380" height="300" rx="20" fill="#fff" stroke="#E2E0D8" stroke-width="1.5"/>
-          <!-- 책상 -->
-          <rect x="60" y="220" width="300" height="10" rx="5" fill="#E2E0D8"/>
-          <rect x="90" y="230" width="12" height="50" rx="4" fill="#E2E0D8"/>
-          <rect x="318" y="230" width="12" height="50" rx="4" fill="#E2E0D8"/>
-          <!-- 책 -->
-          <rect x="80" y="185" width="60" height="36" rx="4" fill="#2563EB" opacity=".85"/>
-          <rect x="82" y="187" width="56" height="32" rx="3" fill="#1e3a8a"/>
-          <text x="110" y="207" font-family="sans-serif" font-size="10" fill="#93c5fd" text-anchor="middle" font-weight="700">수학</text>
-          <rect x="148" y="190" width="50" height="31" rx="4" fill="#F59E0B" opacity=".9"/>
-          <text x="173" y="209" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">영어</text>
-          <!-- 노트북 -->
-          <rect x="220" y="170" width="120" height="52" rx="6" fill="#0D1B2A"/>
-          <rect x="224" y="174" width="112" height="44" rx="4" fill="#1e3a8a"/>
-          <line x1="248" y1="188" x2="308" y2="188" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
-          <line x1="248" y1="198" x2="295" y2="198" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" opacity=".6"/>
-          <line x1="248" y1="208" x2="280" y2="208" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" opacity=".4"/>
-          <rect x="230" y="222" width="100" height="6" rx="3" fill="#0D1B2A" opacity=".5"/>
-          <!-- 선생님 실루엣 -->
-          <circle cx="155" cy="110" r="28" fill="#2563EB" opacity=".15"/>
-          <circle cx="155" cy="98" r="18" fill="#0D1B2A"/>
-          <ellipse cx="155" cy="140" rx="26" ry="20" fill="#0D1B2A"/>
-          <text x="155" y="104" font-family="sans-serif" font-size="16" fill="#fff" text-anchor="middle">👩‍🏫</text>
-          <!-- 학생 실루엣 -->
-          <circle cx="270" cy="110" r="28" fill="#F59E0B" opacity=".15"/>
-          <circle cx="270" cy="98" r="18" fill="#0D1B2A" opacity=".8"/>
-          <ellipse cx="270" cy="140" rx="26" ry="20" fill="#0D1B2A" opacity=".8"/>
-          <text x="270" y="104" font-family="sans-serif" font-size="16" fill="#fff" text-anchor="middle">👨‍🎓</text>
-          <!-- 말풍선 -->
-          <rect x="168" y="60" width="84" height="28" rx="8" fill="#2563EB"/>
-          <polygon points="200,88 208,100 216,88" fill="#2563EB"/>
-          <text x="210" y="79" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">1:1 맞춤 수업</text>
-          <!-- 별점 -->
-          <text x="110" y="165" font-family="sans-serif" font-size="13" fill="#F59E0B">★★★★★</text>
-          <!-- 배지 -->
-          <rect x="290" y="44" width="88" height="28" rx="14" fill="#10B981"/>
-          <text x="334" y="62" font-family="sans-serif" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">✓ 24h 매칭</text>
-          <rect x="42" y="44" width="80" height="28" rx="14" fill="#F59E0B"/>
-          <text x="82" y="62" font-family="sans-serif" font-size="10" fill="#0D1B2A" text-anchor="middle" font-weight="700">30분 무료체험</text>
-        </svg>
+        <img src="/images/tutoring1.jpg" alt="드림과외 선생님과 학생이 함께하는 1:1 방문 과외 수업 장면" width="420" height="560" loading="lazy">
       </div>
     </div>
   </div>
@@ -2032,7 +2066,7 @@ export function renderHomePage() {
         <div class="rev-stars">★★★★★</div>
         <p class="rev-text">"3개월 만에 수학 점수가 62점에서 89점으로 올랐어요! 선생님이 학교 시험 경향을 정확히 파악하고 있어서 내신 대비에 특히 효과적이었습니다."</p>
         <div class="rev-author">
-          <div class="rev-avatar" style="background:linear-gradient(135deg,#2563EB,#1e3a8a)">김</div>
+          <div class="rev-avatar" style="background:#5A8F7B">김</div>
           <div><div class="rev-name">김○○ 학생 어머니</div><div class="rev-info">강남구 · 중3 · 수학</div></div>
         </div>
       </div>
@@ -2040,7 +2074,7 @@ export function renderHomePage() {
         <div class="rev-stars">★★★★★</div>
         <p class="rev-text">"영어 내신 성적이 확 올랐어요! 우리 학교 기출 문제를 꿰뚫고 계신 선생님 덕분에 시험 준비가 훨씬 수월해졌습니다. 매칭도 하루 만에 돼서 너무 좋았어요."</p>
         <div class="rev-author">
-          <div class="rev-avatar" style="background:linear-gradient(135deg,#F59E0B,#d97706)">박</div>
+          <div class="rev-avatar" style="background:#C4956A">박</div>
           <div><div class="rev-name">박○○ 학생</div><div class="rev-info">서초구 · 고2 · 영어</div></div>
         </div>
       </div>
@@ -2100,10 +2134,10 @@ export function renderSubjectPage({ subject }) {
 
   const body = `
 <style>
-.subj-hero{background:linear-gradient(135deg,#0D1B2A 0%,#1e3a6e 100%);color:#fff;padding:64px 20px 56px;text-align:center}
+.subj-hero{background:linear-gradient(135deg,#2F3E2E 0%,#4A6741 60%,#5A8F7B 100%);color:#fff;padding:64px 20px 56px;text-align:center}
 .subj-hero-emoji{font-size:56px;margin-bottom:16px}
 .subj-hero h1{font-size:clamp(28px,5vw,44px);font-weight:800;margin:0 0 12px}
-.subj-hero h1 em{color:#F59E0B;font-style:normal}
+.subj-hero h1 em{color:#E8D5B5;font-style:normal}
 .subj-hero p{font-size:17px;opacity:.85;max-width:560px;margin:0 auto}
 /* 시도 그리드 */
 .sido-subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:36px}
@@ -2111,8 +2145,8 @@ export function renderSubjectPage({ subject }) {
 .sido-subj-card:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:var(--shadow-h)}
 .sido-subj-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .sido-subj-name{font-size:17px;font-weight:700;color:var(--ink)}
-.sido-badge{font-size:11px;padding:2px 7px;border-radius:10px;font-weight:600;background:#dbeafe;color:#1d4ed8}
-.sido-badge-online{background:#fef3c7;color:#b45309}
+.sido-badge{font-size:11px;padding:2px 7px;border-radius:10px;font-weight:600;background:rgba(90,143,123,.1);color:#4A6741}
+.sido-badge-online{background:rgba(196,149,106,.12);color:#9A7B55}
 .sido-subj-desc{font-size:12px;color:var(--muted);line-height:1.4}
 /* 인기 시군구 */
 .popular-gu-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
@@ -2150,6 +2184,18 @@ export function renderSubjectPage({ subject }) {
   </div>
 </section>
 
+<!-- 교육정보 -->
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">STUDY GUIDE</span>
+    <h2 class="sec-title">${subject} <em>교육정보</em></h2>
+    <p class="sec-desc">${subject} 공부법, 내신 전략, 수능 대비 가이드를 확인하세요.</p>
+    <div class="link-list">
+      ${(EDU_ARTICLES[subject] || []).map(a => `<a href="/${a.slug}">${a.title}</a>`).join('')}
+    </div>
+  </div>
+</section>
+
 ${consultForm({
   leftTitle: `<em>${subject} 과외</em> 무료 상담 신청`,
   leftDesc: `지역과 학년을 알려주시면 24시간 내 ${subject} 전문 선생님을 연결해드립니다.`,
@@ -2157,4 +2203,357 @@ ${consultForm({
 })}`;
 
   return layout({ head, body, keyword: `${subject}과외`, region: '' });
+}
+
+// ── 교육정보 페이지 렌더러 ────────────────────────────────
+const EDU_CONTENT = {
+  수학공부법: {
+    sections: [
+      { h: '개념 이해가 먼저입니다', p: '수학은 공식을 외우는 과목이 아닙니다. 왜 그 공식이 나오는지, 어떤 상황에서 쓰이는지를 이해해야 합니다. 교과서 정의를 읽고 "왜?"라는 질문을 던져보세요. 개념을 설명할 수 있을 때 비로소 이해한 것입니다.' },
+      { h: '유형별 반복 훈련', p: '개념을 이해했다면 유형별 문제를 반복해서 풀어야 합니다. 같은 유형을 최소 5문제 이상 연속으로 풀면 풀이 패턴이 몸에 익습니다. 처음엔 기본 유형부터, 익숙해지면 심화 유형으로 넘어가세요.' },
+      { h: '오답 노트는 성적을 올리는 열쇠', p: '틀린 문제를 그냥 넘기면 같은 실수를 반복합니다. 오답 노트에 (1)문제 (2)내가 틀린 풀이 (3)올바른 풀이 (4)틀린 이유를 정리하세요. 시험 전에 오답 노트만 복습해도 점수가 크게 오릅니다.' },
+      { h: '시간 관리 연습', p: '실전에서는 시간이 부족해서 못 푸는 경우가 많습니다. 평소에 타이머를 켜고 문제를 풀어보세요. 한 문제에 3분 이상 걸리면 표시해두고 넘어가는 연습을 하면, 실전에서 시간 배분이 자연스러워집니다.' },
+      { h: '1:1 과외가 효과적인 이유', p: '수학은 학생마다 막히는 포인트가 다릅니다. 학원 수업은 모두에게 같은 진도를 나가지만, 1:1 과외는 학생이 약한 부분만 집중적으로 잡아줍니다. 드림과외 선생님은 학생 수준에 맞춰 개념 설명 → 유형 연습 → 오답 정리까지 체계적으로 관리합니다.' },
+    ],
+  },
+  수학내신전략: {
+    sections: [
+      { h: '교과서가 출제의 80%입니다', p: '내신 시험은 교과서에서 나옵니다. 교과서 예제·유제·연습문제를 완벽히 풀 수 있어야 합니다. 특히 "예제"의 풀이 과정을 그대로 재현할 수 있는지 확인하세요. 교과서를 3번 반복하면 기본 점수는 확보됩니다.' },
+      { h: '학교별 기출 분석이 핵심', p: '같은 교육과정이라도 선생님마다 출제 스타일이 다릅니다. 이전 시험지를 구해서 어떤 유형을 자주 출제하는지, 서술형 비중은 어떤지 분석하세요. 드림과외 선생님은 학교별 기출 경향을 파악하고 있어 효율적인 대비가 가능합니다.' },
+      { h: '서술형 답안 작성법', p: '서술형은 과정을 얼마나 논리적으로 적느냐가 관건입니다. 풀이 과정에서 "∵(이유)"와 "∴(결론)"을 명확히 표시하고, 조건→풀이→답 순서로 정리하세요. 단위와 조건 확인도 감점 포인트이니 꼭 챙기세요.' },
+      { h: '시험 2주 전 학습 타임라인', p: '2주 전: 범위 전체 개념 복습 / 10일 전: 유형별 문제 풀기 / 1주일 전: 오답 정리 + 기출 풀기 / 3일 전: 틀린 문제만 재풀이 / 전날: 공식·핵심 개념만 훑기. 이 타임라인을 지키면 벼락치기 없이 안정적으로 준비할 수 있습니다.' },
+      { h: '과외로 내신 관리하는 법', p: '매주 정해진 시간에 과외를 받으면 학습 루틴이 잡힙니다. 선생님이 매 수업 끝에 다음 주 과제를 내고, 시험 전에는 모의 시험을 실시합니다. 혼자 하면 놓치기 쉬운 개념 빈틈을 1:1로 채워주는 것이 과외의 핵심입니다.' },
+    ],
+  },
+  수학오답관리: {
+    sections: [
+      { h: '오답 노트, 왜 만들어야 하나요?', p: '같은 유형을 계속 틀리는 건 개념이 흔들리거나 풀이 습관에 문제가 있기 때문입니다. 오답 노트는 자신의 약점 지도를 만드는 과정입니다. 시험 전 오답 노트만 보면 가장 효율적인 복습이 됩니다.' },
+      { h: '효과적인 오답 노트 작성법', p: '(1)문제를 적거나 붙인다 (2)내 풀이를 적는다(틀렸더라도) (3)올바른 풀이를 적는다 (4)"왜 틀렸는지" 이유를 한 줄로 적는다. 이유를 적는 과정이 가장 중요합니다. 계산 실수인지, 개념 착오인지, 문제를 잘못 읽었는지 구분하세요.' },
+      { h: '오답 유형별 대처법', p: '계산 실수: 풀이를 천천히 다시 쓰는 연습 / 개념 착오: 교과서 해당 단원 복습 / 시간 부족: 타이머 훈련 / 문제 이해 부족: 문제 조건에 밑줄 긋기 연습. 유형별로 다른 대처법이 필요합니다.' },
+      { h: '주간 오답 복습 루틴', p: '매주 일요일, 그 주에 틀린 문제를 다시 풀어보세요. 다시 틀리는 문제가 진짜 약점입니다. 이 문제들만 별도로 표시해 시험 전 집중 공략하세요. 3주 연속 맞추면 그 유형은 졸업입니다.' },
+      { h: '과외 선생님과 함께하는 오답 관리', p: '혼자 오답 노트를 만들면 "왜 틀렸는지" 정확히 파악하기 어렵습니다. 과외 선생님이 오답 원인을 분석하고, 약한 개념을 보충 설명하면 같은 실수를 반복하지 않게 됩니다. 드림과외에서는 매 수업 오답 분석을 기본으로 진행합니다.' },
+    ],
+  },
+  수학개념정리: {
+    sections: [
+      { h: '개념 정리의 올바른 순서', p: '(1)교과서 정의 읽기 (2)정의를 내 말로 바꿔 쓰기 (3)예제 직접 풀기 (4)비슷한 유형 3문제 풀기. 이 4단계를 거치면 암기가 아니라 이해 기반의 개념 정리가 됩니다.' },
+      { h: '단원 간 연결 고리 찾기', p: '수학은 단원끼리 이어져 있습니다. 일차함수 → 이차함수 → 미분. 새 단원을 배울 때 이전 단원과 어떻게 연결되는지 파악하면 전체 그림이 보입니다. 마인드맵으로 단원 관계도를 그려보는 것도 좋은 방법입니다.' },
+      { h: '공식을 외우지 말고 유도하세요', p: '공식을 암기만 하면 살짝 변형된 문제에서 무너집니다. 공식이 어디서 나왔는지 유도 과정을 이해하면, 시험장에서 공식이 생각 안 나도 직접 만들어 쓸 수 있습니다. 핵심 공식 10개의 유도 과정을 직접 써보세요.' },
+      { h: '개념 확인 자가 테스트', p: '친구에게 설명하듯 개념을 소리 내어 설명해보세요. 막히는 부분이 바로 약점입니다. 또는 교과서를 덮고 단원 핵심 내용을 백지에 써보는 "백지 복습법"도 효과적입니다.' },
+      { h: '1:1 과외에서의 개념 학습', p: '과외 선생님은 학생이 개념을 정확히 이해했는지 질문으로 확인합니다. "이 공식이 왜 성립해?", "이 조건이 없으면 어떻게 돼?"와 같은 질문으로 깊은 이해를 이끌어냅니다. 학원에서는 불가능한 양방향 소통이 과외의 장점입니다.' },
+    ],
+  },
+  수능수학대비: {
+    sections: [
+      { h: '수능 수학, 출제 원리를 파악하세요', p: '수능 수학은 교과서 개념의 심화·융합입니다. EBS 연계 교재를 풀되, 단순히 많이 푸는 것보다 한 문제를 깊이 분석하는 것이 중요합니다. 킬러 문항은 여러 개념이 결합된 구조이므로, 어떤 개념들이 섞였는지 파악하는 연습을 하세요.' },
+      { h: '등급별 맞춤 전략', p: '1~2등급 목표: 킬러 문항 대비에 집중, 4점 문항 시간 단축 / 3~4등급 목표: 3점 문항 정확도 높이기, 쉬운 4점 문항 공략 / 5등급 이하: 기본 개념 완성부터, 2점·쉬운 3점 확실히 맞추기. 현재 위치에 맞는 전략이 필요합니다.' },
+      { h: '시간 배분 전략 (75분)', p: '1~15번(가형 기준): 25분 / 16~21번: 20분 / 22~28번: 20분 / 29~30번: 10분. 어려운 문제에 매달리지 말고 과감히 넘기세요. 쉬운 문제를 확실히 맞추는 것이 등급을 올리는 가장 빠른 길입니다.' },
+      { h: '기출 활용법', p: '최근 5개년 수능·모의고사 기출을 유형별로 분류해서 풀어보세요. 각 유형의 접근법을 정리하고, 틀린 문제는 어떤 개념이 부족했는지 분석합니다. 기출 3회독이면 출제 패턴이 보이기 시작합니다.' },
+      { h: '수능 대비 과외의 효과', p: '수능은 혼자 준비하면 방향을 잃기 쉽습니다. 과외 선생님이 학생 수준에 맞는 로드맵을 짜고, 매주 약점을 체크하며 방향을 잡아줍니다. 특히 킬러 문항 풀이 전략과 시간 관리는 경험 있는 선생님의 코칭이 큰 차이를 만듭니다.' },
+    ],
+  },
+  영어공부법: {
+    sections: [
+      { h: '어휘가 영어의 기초입니다', p: '영어 성적의 70%는 어휘력에서 결정됩니다. 하루 30개씩 꾸준히 외우되, 문장 속에서 외우세요. 단어장만 달달 외우면 실전에서 못 떠올립니다. 예문과 함께 외우면 독해 속도도 함께 올라갑니다.' },
+      { h: '문법은 패턴으로 익히세요', p: '문법책을 처음부터 끝까지 읽는 것보다, 자주 출제되는 패턴 30개를 완벽히 익히는 것이 낫습니다. 관계대명사, 분사구문, 가정법, 비교급 등 핵심 문법을 예문 중심으로 반복하세요.' },
+      { h: '독해는 구조 파악이 핵심', p: '영어 지문은 일정한 구조를 가집니다. 주제문(보통 첫 문장) → 근거 → 예시 → 결론. 이 구조를 파악하며 읽으면 지문 전체를 다 해석하지 않아도 답을 찾을 수 있습니다. 매일 1지문씩 구조 분석 연습을 하세요.' },
+      { h: '듣기와 말하기도 함께', p: '내신에서 듣기 비중이 점점 커지고 있습니다. 매일 15분 영어 듣기 연습을 하세요. EBS 교재 음원이 가장 시험에 가깝습니다. 들으면서 따라 말하는 섀도잉을 하면 듣기와 말하기가 동시에 향상됩니다.' },
+      { h: '영어 과외의 차별점', p: '영어는 학생마다 약한 영역이 다릅니다. 어휘가 부족한 학생, 문법이 약한 학생, 독해 속도가 느린 학생. 1:1 과외는 학생의 약점을 정확히 진단하고 맞춤 처방을 내립니다. 드림과외 영어 선생님은 학교 교과서 본문 분석까지 함께합니다.' },
+    ],
+  },
+  영어내신전략: {
+    sections: [
+      { h: '교과서 본문 완벽 암기', p: '영어 내신의 핵심은 교과서 본문입니다. 본문을 3단계로 공략하세요. 1단계: 해석 완벽히 하기 / 2단계: 주요 표현·문법 포인트 정리 / 3단계: 빈칸·순서·요약 유형으로 변형 연습. 본문을 통째로 외울 필요는 없지만, 핵심 문장은 영작할 수 있어야 합니다.' },
+      { h: '변형 문제 대비가 당락을 결정', p: '내신 영어는 교과서 지문을 변형한 문제가 출제됩니다. 동의어 치환, 문장 순서 바꾸기, 빈칸 넣기 등. 교과서 문장을 다양하게 바꿔보는 연습이 필요합니다. 핵심 문장의 동의어 표현을 3개씩 정리해두세요.' },
+      { h: '서술형·영작 대비', p: '서술형 비중이 40%까지 높아진 학교도 있습니다. 교과서 주요 문장을 영작할 수 있도록 연습하세요. 특히 조건 영작(주어진 단어를 사용해서 쓰기)은 문법 정확성이 중요하므로, 시제·수일치·관사를 꼼꼼히 체크하는 습관이 필요합니다.' },
+      { h: '듣기 평가 만점 전략', p: '듣기는 연습량이 실력입니다. 시험 2주 전부터 매일 20분씩 듣기 연습을 하세요. 한 번 듣고 답을 적은 후, 스크립트를 보며 못 들은 부분을 확인합니다. 같은 음원을 3번 반복하면 귀가 트입니다.' },
+      { h: '과외로 영어 내신 올리기', p: '영어 내신은 학교 선생님의 출제 스타일을 아는 것이 중요합니다. 드림과외 선생님은 학교별 시험 유형을 분석하고, 교과서 본문 기반의 변형 문제를 직접 만들어 연습시킵니다. 서술형 첨삭도 매 수업 진행합니다.' },
+    ],
+  },
+  영어독해전략: {
+    sections: [
+      { h: '지문 구조를 먼저 파악하세요', p: '영어 지문은 주제문 → 뒷받침 문장 → 예시 → 결론 구조입니다. 첫 문장과 마지막 문장을 먼저 읽으면 전체 내용의 70%를 파악할 수 있습니다. 역접(However, But)과 인과(Therefore, Thus) 연결어를 눈여겨보세요.' },
+      { h: '유형별 접근법', p: '주제 찾기: 반복되는 핵심어 추적 / 빈칸 추론: 앞뒤 문맥 단서 활용 / 순서 배열: 지시어·접속사 흐름 파악 / 문장 삽입: 대명사·지시어가 가리키는 대상 확인. 각 유형마다 정해진 풀이 전략이 있습니다.' },
+      { h: '모르는 단어 대처법', p: '독해 중 모르는 단어가 나오면 당황하지 마세요. 문맥에서 의미를 추론하는 연습이 중요합니다. 긍정/부정, 원인/결과 관계에서 단어의 느낌을 파악하면 정확한 뜻을 몰라도 문제를 풀 수 있습니다.' },
+      { h: '속독 훈련법', p: '처음에는 정확하게, 점차 빠르게. 매일 1지문을 시간 재며 읽고, 이해도를 체크하세요. 해석할 때 한국어로 번역하지 말고, 영어 어순 그대로 의미를 파악하는 직독직해 연습이 속도를 높이는 핵심입니다.' },
+      { h: '과외에서의 독해 훈련', p: '과외 선생님과 함께 지문을 분석하면, 혼자 읽을 때 놓치는 구조와 단서를 발견할 수 있습니다. 선생님이 "이 문장에서 답의 근거를 찾아봐"라고 물으면, 스스로 근거를 찾는 능력이 길러집니다.' },
+    ],
+  },
+  영어어휘암기: {
+    sections: [
+      { h: '하루 30개, 문장과 함께', p: '단어만 달달 외우면 3일이면 절반을 잊습니다. 단어를 문장 속에서 외우세요. "abandon = 포기하다" 대신 "He abandoned his plan. (그는 계획을 포기했다.)" 이렇게 외우면 오래 기억됩니다.' },
+      { h: '어근·접두사·접미사 활용', p: 'un-(부정), re-(다시), -tion(명사), -able(가능) 같은 조각을 알면 처음 보는 단어도 의미를 추론할 수 있습니다. 핵심 어근 50개만 외우면 수천 개 단어의 의미를 유추할 수 있습니다.' },
+      { h: '반복 주기가 핵심입니다', p: '에빙하우스 망각 곡선에 따르면, 외운 후 1일·3일·7일·30일에 복습하면 장기 기억에 정착됩니다. 매일 새 단어 30개 + 이전 복습 30개, 총 60개를 투자 시간 20분으로 관리하세요.' },
+      { h: '시험 빈출 어휘 정리', p: '모든 단어를 똑같이 외울 필요는 없습니다. 교과서·모의고사·수능에서 자주 나오는 핵심 어휘 1,000개를 우선 정복하세요. 빈도순 단어장을 활용하면 효율적입니다.' },
+      { h: '과외로 어휘력 키우기', p: '과외 선생님이 매 수업 단어 테스트를 진행하면 강제적인 복습 효과가 있습니다. 또한 독해 수업 중 만나는 모르는 단어를 바로 정리해주므로, 자연스럽게 어휘력이 늘어납니다.' },
+    ],
+  },
+  수능영어대비: {
+    sections: [
+      { h: '수능 영어, 절대평가를 활용하세요', p: '수능 영어는 절대평가입니다. 90점 이상이면 1등급. 매 문항을 완벽히 맞추려 하기보다, 자신 있는 유형에서 확실히 득점하는 전략이 중요합니다. 듣기 17문항을 먼저 확보하고, 독해에서 실수를 줄이세요.' },
+      { h: 'EBS 연계 활용법', p: 'EBS 수능특강·수능완성은 간접 연계됩니다. 지문의 소재나 주제가 비슷하게 출제되므로, EBS 교재를 풀 때 지문의 핵심 주제와 논리 구조를 파악하는 연습이 중요합니다. 단순히 답만 맞추지 말고, "왜 이 답인지" 근거를 정리하세요.' },
+      { h: '고난도 유형 공략', p: '빈칸 추론, 순서 배열, 문장 삽입이 가장 어려운 유형입니다. 이 세 유형은 지문의 논리 흐름을 정확히 파악해야 풀 수 있습니다. 매일 3문제씩 이 유형만 집중 연습하면, 한 달 후 정답률이 크게 올라갑니다.' },
+      { h: '시간 관리 (70분)', p: '듣기: 25분(자동 진행) / 독해 18~28번: 25분 / 고난도 29~45번: 20분. 어려운 문제는 2분 이상 고민하지 말고 넘기세요. 마지막에 다시 돌아오는 것이 시간 효율적입니다.' },
+      { h: '수능 영어 과외의 가치', p: '수능 영어는 유형별 전략이 정해져 있습니다. 과외 선생님이 학생의 약한 유형을 진단하고, 그 유형에 맞는 풀이 전략을 집중 훈련시킵니다. 1등급을 향한 맞춤 로드맵, 드림과외에서 함께하세요.' },
+    ],
+  },
+  국어공부법: {
+    sections: [
+      { h: '국어도 공부가 필요합니다', p: '국어는 "감"으로 푸는 과목이 아닙니다. 문학은 분석 틀이, 비문학은 독해 전략이 필요합니다. 체계적으로 접근하면 가장 빠르게 성적이 오르는 과목이 국어입니다.' },
+      { h: '지문 읽기의 기술', p: '지문을 읽을 때 핵심 문장에 밑줄을 긋고, 각 문단의 핵심 내용을 한 줄로 요약하세요. 이 습관이 쌓이면 어떤 지문이든 빠르게 구조를 파악할 수 있습니다.' },
+      { h: '문학 작품 접근법', p: '시: 화자의 정서와 태도 파악 / 소설: 인물의 심리 변화와 갈등 구조 / 고전: 현대어 해석 + 주제 의식. 작품을 읽을 때 "작가가 말하고 싶은 것이 무엇인가?"를 항상 생각하세요.' },
+      { h: '문법, 어렵지 않습니다', p: '국어 문법은 범위가 정해져 있습니다. 음운 변동, 품사, 문장 구조, 국어의 역사. 이 네 가지를 정리하면 문법 문제의 90%를 커버할 수 있습니다. 개념을 정리한 후 기출 문제로 확인하세요.' },
+      { h: '과외로 국어 성적 올리기', p: '국어는 혼자 공부하면 "왜 이 답이 맞는지" 납득이 안 되는 경우가 많습니다. 과외 선생님과 함께 문제를 풀면, 정답의 근거를 명확히 이해할 수 있습니다. 특히 서술형 답안 작성 능력은 피드백 없이는 향상되기 어렵습니다.' },
+    ],
+  },
+  국어내신전략: {
+    sections: [
+      { h: '교과서 작품 분석이 전부입니다', p: '국어 내신은 교과서에 실린 작품에서 출제됩니다. 각 작품의 주제, 표현 기법, 인물 분석을 노트에 정리하세요. 선생님이 수업 시간에 강조한 부분은 시험에 나올 확률이 높습니다.' },
+      { h: '수업 필기의 중요성', p: '국어 내신에서는 선생님의 해석이 정답입니다. 수업 시간에 선생님이 설명하는 작품 해석, 강조 포인트를 빠짐없이 필기하세요. 교과서에 없는 내용도 시험에 나올 수 있습니다.' },
+      { h: '비문학 지문 공략', p: '교과서 비문학 지문은 반복 읽기가 핵심입니다. 1회차: 전체 흐름 파악 / 2회차: 핵심 개념 정리 / 3회차: 문단별 관계 파악. 비문학은 구조를 이해하면 어떤 변형 문제가 나와도 대응할 수 있습니다.' },
+      { h: '서술형 답안 고득점 비법', p: '서술형은 "키워드"를 넣었느냐가 핵심입니다. 문제에서 묻는 것을 정확히 파악하고, 답안에 반드시 포함해야 할 핵심어를 포함하세요. 두괄식으로 결론부터 쓰고, 근거를 덧붙이는 구조가 가장 안전합니다.' },
+      { h: '과외 선생님의 내신 관리', p: '과외 선생님은 학교별 출제 경향에 맞춰 예상 문제를 만들어줍니다. 서술형 답안을 직접 써보고 첨삭받는 과정이 점수 향상에 가장 효과적입니다. 작품 해석도 학교 선생님의 관점에 맞춰 준비합니다.' },
+    ],
+  },
+  국어비문학전략: {
+    sections: [
+      { h: '비문학, 정보 처리 능력입니다', p: '비문학은 배경 지식이 아니라 글을 정확히 읽는 능력을 묻습니다. 처음 보는 주제라도 지문 안에 모든 답이 있습니다. 지문 밖 지식으로 풀면 오답에 빠집니다.' },
+      { h: '문단별 핵심 파악법', p: '각 문단을 읽고 한 줄 요약을 적어보세요. "이 문단은 ○○에 대한 설명이다" 수준이면 충분합니다. 전체를 읽은 후 요약을 이어 보면, 글의 논리 구조가 한눈에 보입니다.' },
+      { h: '선지 분석 기술', p: '보기를 읽을 때 "지문에 근거가 있는가?"를 따져보세요. 맞는 것 같지만 지문에 없는 내용은 오답입니다. 선지의 핵심어를 지문에서 찾아 밑줄을 긋는 습관이 정확도를 높입니다.' },
+      { h: '출제 빈출 주제 정리', p: '과학 기술, 경제 원리, 철학 논증, 예술 비평이 자주 나옵니다. 각 분야의 기본 용어를 미리 익혀두면 지문 이해 속도가 빨라집니다. 기출 지문을 분야별로 분류해서 읽어보세요.' },
+      { h: '과외로 비문학 정복하기', p: '비문학은 혼자 읽으면 "이해했다고 착각"하기 쉽습니다. 과외 선생님이 "이 문단의 핵심이 뭐야?"라고 질문하면, 정확히 이해했는지 바로 확인됩니다. 이런 훈련이 반복되면 어떤 지문이든 빠르고 정확하게 읽을 수 있게 됩니다.' },
+    ],
+  },
+  국어문학분석: {
+    sections: [
+      { h: '문학의 4요소를 파악하세요', p: '모든 문학 작품은 화자/서술자, 소재, 주제, 표현 기법으로 분석할 수 있습니다. 시를 읽으면 "누가 말하는지(화자)", "어떤 감정인지(정서)", "어떤 방법으로 표현했는지(기법)"를 정리하세요.' },
+      { h: '시 분석의 3단계', p: '1단계: 시어의 사전적 의미 파악 / 2단계: 시어의 비유적·상징적 의미 추론 / 3단계: 화자의 정서와 태도 종합. 이 순서로 분석하면 생소한 시도 체계적으로 해석할 수 있습니다.' },
+      { h: '소설 분석 프레임', p: '인물(성격과 변화) / 사건(갈등의 원인과 해결) / 배경(시간·공간·사회적 배경의 의미) / 서술 시점(1인칭/3인칭, 관찰자/전지적). 이 네 가지 틀로 분석하면 어떤 소설 문제든 대응할 수 있습니다.' },
+      { h: '고전 문학 접근법', p: '고전 문학은 현대어 해석이 첫 번째 관문입니다. 자주 쓰이는 고어 표현 50개를 먼저 외우세요. 그다음 작품의 시대적 배경과 작가 의식을 파악하면 해석이 수월해집니다.' },
+      { h: '과외에서의 문학 수업', p: '문학은 해석의 다양성이 있지만, 시험에서는 "출제자의 의도"에 맞는 해석이 정답입니다. 과외 선생님은 출제 의도에 맞는 분석법을 가르치고, 학생이 혼자 분석하는 능력을 키워줍니다.' },
+    ],
+  },
+  수능국어대비: {
+    sections: [
+      { h: '수능 국어의 특성 이해', p: '수능 국어는 사고력 시험입니다. 암기보다 글을 정확히 읽고 논리적으로 판단하는 능력이 필요합니다. 독서(비문학)·문학·언어와 매체(문법), 세 영역을 균형 있게 준비하세요.' },
+      { h: '화법과 작문 만점 전략', p: '1~5번 화법·작문은 규칙이 명확한 영역입니다. 대화 원리, 발표 전략, 작문 과정 등 출제 유형이 정해져 있으므로 기출 20문제만 풀어도 패턴이 보입니다. 여기서 5문제 확보하면 나머지가 편해집니다.' },
+      { h: '독서(비문학) 고득점 비결', p: '독서 영역은 매년 새로운 지문이 나오므로, 많이 읽는 것보다 구조적으로 읽는 훈련이 중요합니다. 지문의 정보 간 관계(원인-결과, 비교-대조, 문제-해결)를 파악하며 읽으세요.' },
+      { h: '시간 관리 (80분)', p: '화법·작문(1~5번): 8분 / 언어·매체(11~16번): 10분 / 독서(6~10, 17~27번): 35분 / 문학(28~45번): 25분 / 검토: 2분. 독서에 가장 많은 시간을 배분하되, 한 지문에 8분 이상 쓰지 마세요.' },
+      { h: '과외로 수능 국어 대비하기', p: '수능 국어는 혼자 풀면 실력이 정체되기 쉽습니다. 과외 선생님은 오답 원인을 정확히 진단하고, 학생에게 맞는 지문 읽기 전략을 코칭합니다. 매주 모의고사 1회분을 같이 분석하면 꾸준히 성장합니다.' },
+    ],
+  },
+  과학공부법: {
+    sections: [
+      { h: '개념 이해 → 문제 적용', p: '과학은 개념을 이해한 후 문제에 적용하는 과목입니다. 교과서를 읽을 때 "왜 이런 현상이 일어나는가?"를 항상 질문하세요. 원리를 이해하면 처음 보는 문제도 풀 수 있습니다.' },
+      { h: '실험과 탐구 과정 정리', p: '과학 시험에서 실험 관련 문제 비중이 높습니다. 실험의 목적, 변인(독립/종속/통제), 결과 해석, 결론 도출 과정을 정리하세요. 실험 보고서를 직접 작성해보는 연습도 도움됩니다.' },
+      { h: '계산 문제 정복법', p: '물리·화학에서 계산 문제는 공식 암기가 아니라 상황 분석이 핵심입니다. 문제를 읽고 (1)주어진 정보 정리 (2)구하려는 것 확인 (3)적용할 공식 선택. 이 3단계를 습관화하면 계산 문제가 쉬워집니다.' },
+      { h: '단원별 마인드맵 만들기', p: '과학은 단원 내 개념들이 유기적으로 연결됩니다. 각 단원을 공부한 후 마인드맵으로 핵심 개념과 관계를 정리하세요. 시험 전에 마인드맵만 보면 전체 단원이 한눈에 들어옵니다.' },
+      { h: '과외로 과학 성적 올리기', p: '과학은 개념 질문을 많이 할수록 빨리 늘어납니다. 과외 선생님에게 "왜요?"를 편하게 물어볼 수 있는 환경이 중요합니다. 드림과외 선생님은 실험 수행평가 준비부터 계산 문제 풀이까지 꼼꼼히 함께합니다.' },
+    ],
+  },
+  과학내신전략: {
+    sections: [
+      { h: '교과서 + 실험 노트가 핵심', p: '과학 내신은 교과서 개념과 실험에서 출제됩니다. 교과서를 3번 읽고, 수업 시간 실험 내용을 빠짐없이 정리하세요. 선생님이 칠판에 적은 보충 설명도 반드시 기록하세요.' },
+      { h: '서술형 대비 핵심', p: '과학 서술형은 "개념을 정확한 용어로 설명할 수 있느냐"를 봅니다. 답안에 반드시 과학 용어를 사용하고, 원인과 결과를 논리적으로 연결하세요. 모범 답안을 여러 번 써보는 연습이 효과적입니다.' },
+      { h: '수행평가 만점 전략', p: '수행평가는 실험 보고서, 발표, 포트폴리오 등 다양합니다. 실험 보고서는 가설-방법-결과-결론 형식을 지키고, 표와 그래프를 깔끔하게 그리세요. 발표는 핵심만 간결하게, 시간 엄수가 중요합니다.' },
+      { h: '시험 전 복습 전략', p: '2주 전: 전 범위 개념 1회독 / 1주 전: 문제 풀이 + 오답 정리 / 3일 전: 실험 과정·결과 복습 / 전날: 핵심 공식·용어만 확인. 특히 실험 관련 내용은 그림과 함께 정리하면 기억에 오래 남습니다.' },
+      { h: '과외로 과학 내신 관리', p: '과학은 단원마다 난이도 차이가 크고, 학생마다 어려워하는 단원이 다릅니다. 과외 선생님이 약한 단원을 집중적으로 보충하고, 수행평가 준비도 함께 도와줍니다. 실험 보고서 작성법도 1:1로 배울 수 있습니다.' },
+    ],
+  },
+  과학실험대비: {
+    sections: [
+      { h: '실험 보고서의 기본 구조', p: '좋은 실험 보고서는 정해진 틀을 따릅니다. 실험 목적 → 가설 설정 → 준비물 → 실험 방법 → 결과(표/그래프) → 결론 → 고찰. 각 항목을 빠짐없이 채우는 것이 기본 점수를 확보하는 열쇠입니다.' },
+      { h: '변인 통제 이해하기', p: '실험에서 가장 중요한 것은 변인 통제입니다. 독립 변인(내가 바꾸는 것), 종속 변인(측정하는 결과), 통제 변인(같게 유지하는 것)을 정확히 구분하세요. 이것을 실험 보고서에 명시하면 높은 점수를 받습니다.' },
+      { h: '표와 그래프 작성법', p: '실험 결과는 표로 정리한 후 그래프로 시각화하세요. 그래프에는 제목, 축 이름, 단위를 반드시 표시하고, 데이터 점을 정확히 찍은 후 추세선을 그리세요. 깔끔한 그래프가 보고서 품질을 높입니다.' },
+      { h: '결론과 고찰 쓰는 법', p: '결론은 실험 결과를 가설과 비교하여 "가설이 맞았다/틀렸다"를 판단하는 것입니다. 고찰에는 오차 원인, 개선 방안, 추가 탐구 주제를 적으세요. 이 부분이 수행평가에서 A등급을 결정합니다.' },
+      { h: '과외 선생님과 실험 대비', p: '수행평가는 채점 기준이 정해져 있습니다. 과외 선생님이 채점 기준에 맞춰 보고서를 미리 검토하고 피드백을 줍니다. 혼자 쓰면 놓치기 쉬운 형식적 요소와 내용적 깊이를 함께 잡아줍니다.' },
+    ],
+  },
+  과학개념학습: {
+    sections: [
+      { h: '교과서를 능동적으로 읽기', p: '교과서를 수동적으로 읽지 마세요. 읽으면서 "왜?"를 반복적으로 질문하세요. "왜 물이 끓으면 기체가 되지?" "왜 행성은 타원 궤도를 돌지?" 이런 질문이 개념의 깊은 이해로 이끕니다.' },
+      { h: '시각 자료 활용', p: '과학 개념은 글로 읽는 것보다 그림·도표·영상으로 보면 이해가 빠릅니다. 교과서 삽화를 직접 다시 그려보세요. 세포 구조, 회로도, 지구 내부 구조 등을 직접 그리면 기억에 오래 남습니다.' },
+      { h: '일상과 연결하기', p: '과학 개념을 일상 현상과 연결하면 쉽게 이해됩니다. 관성의 법칙 = 버스 급정거 시 몸이 앞으로 쏠림 / 삼투압 = 배추에 소금 뿌리면 물이 나옴. 이렇게 연결하면 시험에서도 쉽게 떠올립니다.' },
+      { h: '단원 정리 노트 만들기', p: '한 단원을 공부한 후 A4 한 장에 핵심 내용을 요약하세요. 핵심 개념, 공식, 실험 결과, 자주 틀리는 포인트를 포함하세요. 시험 직전에 이 한 장만 보면 전체를 빠르게 복습할 수 있습니다.' },
+      { h: '과외에서의 개념 학습', p: '과학 개념은 "이해했다고 착각"하기 쉽습니다. 과외 선생님이 개념을 설명하게 하고, 부족한 부분을 바로 보충합니다. 질문과 답변이 오가는 양방향 수업이 과학 이해도를 빠르게 높입니다.' },
+    ],
+  },
+  수능과학대비: {
+    sections: [
+      { h: '선택과목 전략적으로 고르기', p: '물리학, 화학, 생명과학, 지구과학 중 자신에게 맞는 2과목을 선택하세요. 암기가 강하면 생명과학·지구과학, 계산이 강하면 물리학·화학이 유리합니다. 학교 내신과 겹치는 과목을 선택하면 효율적입니다.' },
+      { h: '개념 완성이 먼저', p: '수능 과탐은 개념에서 출제됩니다. 교과서 개념을 100% 이해한 후에 문제를 풀어야 합니다. 개념이 불완전한 상태에서 문제만 풀면 실력이 정체됩니다. 기본 개념 1회독 → 심화 개념 → 문제 풀이 순서를 지키세요.' },
+      { h: '킬러 문항 대비법', p: '2~3문제의 고난도 문항이 등급을 결정합니다. 이 문항은 여러 개념을 융합하거나, 실험 설계 능력을 묻습니다. 기출 킬러 문항을 유형별로 분류해 집중 연습하세요. 한 문제당 10분 이상 깊이 사고하는 훈련이 필요합니다.' },
+      { h: '기출 분석 방법', p: '최근 5개년 수능·모의고사 기출을 3회독 하세요. 1회독: 풀기 / 2회독: 오답 분석 + 개념 보충 / 3회독: 시간 내 풀기. 기출을 충분히 분석하면 출제자가 어떤 개념을 어떻게 물어보는지 패턴이 보입니다.' },
+      { h: '과외로 수능 과탐 준비하기', p: '수능 과탐은 개념의 깊은 이해가 필요해서, 질문할 수 있는 환경이 중요합니다. 과외 선생님이 어려운 개념을 학생 수준에 맞게 설명하고, 킬러 문항 풀이 전략을 코칭합니다. 주간 모의고사 분석도 함께 진행합니다.' },
+    ],
+  },
+  사회공부법: {
+    sections: [
+      { h: '흐름을 이해하세요', p: '사회 과목은 단순 암기가 아니라 "왜 이런 제도가 생겼는지", "이 현상의 원인과 결과는 무엇인지" 흐름을 이해하는 것이 중요합니다. 개념을 인과 관계로 연결하면 암기할 양이 절반으로 줄어듭니다.' },
+      { h: '키워드 중심 정리', p: '교과서에서 굵은 글씨, 핵심 용어를 먼저 뽑아 정리하세요. 각 키워드의 정의를 한 줄로 쓸 수 있어야 합니다. 키워드끼리의 관계(원인-결과, 비교-대조)를 화살표로 연결하면 구조가 보입니다.' },
+      { h: '자료 해석 능력 키우기', p: '사회 시험에서 그래프, 표, 통계 자료 해석 문제가 자주 나옵니다. 자료를 볼 때 (1)제목 확인 (2)단위 확인 (3)추세 파악 (4)특이점 발견 순서로 분석하세요. 매주 시사 자료 1개를 분석하는 연습을 하면 실력이 쌓입니다.' },
+      { h: '시사와 교과 연계', p: '사회 과목은 시사 이슈와 연결하면 흥미가 생깁니다. 뉴스에서 본 경제 정책, 사회 문제를 교과서 개념과 연결해보세요. 이런 사고 습관이 서술형 문제에서 풍부한 답안을 쓰는 힘이 됩니다.' },
+      { h: '과외로 사회 공부하기', p: '사회는 정리가 잘 되어 있으면 쉽고, 안 되어 있으면 막막한 과목입니다. 과외 선생님이 단원별 핵심을 체계적으로 정리해주고, 서술형 답안 작성법을 직접 연습시킵니다.' },
+    ],
+  },
+  사회내신전략: {
+    sections: [
+      { h: '교과서 3회독 전략', p: '1회독: 전체 흐름 파악, 핵심 키워드 표시 / 2회독: 키워드별 개념 정리, 인과 관계 파악 / 3회독: 빈칸 채우기식 자가 테스트. 3회독이면 내신 기본 점수 80점은 확보됩니다.' },
+      { h: '선생님의 수업 자료 활용', p: '사회 내신은 교과서 + 수업 자료에서 출제됩니다. PPT, 프린트, 영상 자료에서 나온 내용도 시험 범위입니다. 수업 자료를 모아서 교과서 내용과 함께 정리하세요.' },
+      { h: '서술형 고득점 비법', p: '서술형은 (1)핵심 개념 제시 (2)구체적 사례나 근거 (3)결론의 3단 구성으로 작성하세요. "~이기 때문에 ~이다" 형식의 인과 관계 문장이 높은 점수를 받습니다. 분량은 지정된 줄의 80% 이상 채우세요.' },
+      { h: '자주 출제되는 유형 정리', p: '개념 비교(A와 B의 차이점), 그래프/표 해석, 사례 적용(~에 해당하는 것), 서술형(~의 원인/결과 서술). 이 4가지 유형을 기출에서 연습하면 출제 패턴에 익숙해집니다.' },
+      { h: '과외로 사회 내신 올리기', p: '사회 내신은 정리력 싸움입니다. 과외 선생님이 단원별 핵심 정리본을 만들어주고, 서술형 모의 문제를 출제해 연습시킵니다. 혼자 하면 놓치기 쉬운 수업 내 포인트도 함께 짚어줍니다.' },
+    ],
+  },
+  사회서술형대비: {
+    sections: [
+      { h: '서술형 답안의 기본 구조', p: '좋은 서술형 답안은 구조가 명확합니다. 주장(결론) → 근거(이유) → 사례 또는 부연. 한 문장으로 핵심을 말하고, 두세 문장으로 근거를 덧붙이세요. 핵심 용어를 반드시 포함해야 점수를 받습니다.' },
+      { h: '채점 기준 파악하기', p: '서술형은 채점 기준표에 따라 점수가 주어집니다. "키워드 포함 여부", "논리적 연결", "분량 충족"이 주요 기준입니다. 기출 서술형의 모범 답안을 분석하면 어떤 요소가 점수를 결정하는지 알 수 있습니다.' },
+      { h: '논리적 글쓰기 연습', p: '"~이므로 ~이다", "이와 달리 ~", "이를 통해 알 수 있는 것은 ~" 같은 논리적 연결어를 활용하세요. 원인과 결과, 비교와 대조를 명확히 드러내는 문장이 높은 점수를 받습니다.' },
+      { h: '시간 내 답안 쓰기', p: '서술형에 너무 많은 시간을 쓰면 객관식을 놓칩니다. 서술형 1문제당 5분 이내로 쓰는 연습을 하세요. 핵심만 간결하게, 불필요한 서론은 빼고 바로 본론으로 들어가세요.' },
+      { h: '과외에서의 서술형 훈련', p: '서술형은 피드백 없이는 향상되기 어렵습니다. 과외 선생님이 답안을 읽고 "이 부분은 더 구체적으로", "이 키워드가 빠졌어" 같은 피드백을 즉시 줍니다. 이런 반복 훈련이 서술형 실력을 빠르게 올립니다.' },
+    ],
+  },
+  사회시사연계: {
+    sections: [
+      { h: '시사 이슈를 교과서와 연결하기', p: '뉴스에서 접하는 경제 정책, 환경 문제, 인권 이슈는 사회 교과서 개념과 직결됩니다. 뉴스를 볼 때 "이것은 교과서 몇 단원과 관련될까?"를 생각하는 습관을 들이세요.' },
+      { h: '주간 시사 노트 만들기', p: '매주 시사 이슈 2~3개를 골라 (1)요약 (2)관련 교과 개념 (3)나의 의견을 한 페이지로 정리하세요. 이 노트가 쌓이면 서술형에서 활용할 수 있는 풍부한 소재가 됩니다.' },
+      { h: '토론과 글쓰기 연습', p: '시사 이슈에 대해 찬반 의견을 정리하고, 200자 내외로 자신의 입장을 써보세요. 논리적 글쓰기 능력이 향상되면 서술형뿐 아니라 수행평가에서도 좋은 결과를 얻을 수 있습니다.' },
+      { h: '출제 빈출 시사 주제', p: '기후 변화와 탄소 중립, 디지털 경제와 플랫폼 노동, 인구 감소와 지방 소멸, 민주주의와 시민 참여. 이런 주제는 매년 시험에 나올 가능성이 높으니 기본 배경 지식을 갖추어 두세요.' },
+      { h: '과외에서의 시사 학습', p: '과외 선생님과 함께 시사 이슈를 토론하면 비판적 사고력이 길러집니다. 선생님이 다양한 관점을 제시하고, 학생이 자신의 논거를 정리하는 연습은 수행평가와 서술형 모두에 도움됩니다.' },
+    ],
+  },
+  수능사회대비: {
+    sections: [
+      { h: '사탐 선택과목 전략', p: '생활과 윤리, 사회문화, 한국지리가 응시 인원이 많아 등급 받기 유리합니다. 자신의 강점에 맞게 선택하되, 학교 내신과 겹치는 과목을 선택하면 효율적입니다.' },
+      { h: '개념 완벽 정리가 먼저', p: '수능 사탐은 개념 정확도를 묻습니다. 비슷한 개념의 미세한 차이(예: 사회화/재사회화, 형식적 평등/실질적 평등)를 정확히 구분해야 합니다. 헷갈리는 개념 쌍을 정리하는 것이 핵심입니다.' },
+      { h: '자료 분석 문제 공략', p: '표, 그래프, 통계 자료를 읽는 연습을 많이 하세요. 자료의 단위, 기준, 추세를 먼저 파악하고, 선지와 하나씩 대조하세요. 자료 분석 문제는 풀이 시간이 오래 걸리므로, 빠르게 정보를 읽는 연습이 필요합니다.' },
+      { h: '기출 활용법', p: '최근 5개년 수능+모의고사 기출을 유형별로 분류하세요. 개념 확인형, 자료 분석형, 사례 적용형으로 나누어 풀면 각 유형의 접근법이 체계적으로 잡힙니다.' },
+      { h: '과외로 수능 사탐 준비하기', p: '사탐은 개념이 정확해야 고득점이 가능합니다. 과외 선생님이 헷갈리는 개념을 명확히 정리해주고, 자료 분석 문제 풀이 전략을 코칭합니다. 주간 모의고사 분석으로 꾸준히 실력을 점검합니다.' },
+    ],
+  },
+  한국사공부법: {
+    sections: [
+      { h: '흐름이 먼저, 암기는 나중', p: '한국사는 시대 순서와 인과 관계를 먼저 파악하세요. "왜 이 사건이 일어났고, 그 결과 무엇이 바뀌었는지"를 이해하면 암기할 양이 크게 줄어듭니다. 연표를 만들어 전체 흐름을 한눈에 보세요.' },
+      { h: '시대별 키워드 정리', p: '각 시대의 핵심 키워드 10개를 뽑아 정리하세요. 고조선: 8조법 / 삼국: 율령 반포 / 고려: 과거제 / 조선: 훈민정음. 키워드를 중심으로 살을 붙이면 체계적으로 공부할 수 있습니다.' },
+      { h: '헷갈리는 사건 비교 정리', p: '임진왜란 vs 병자호란, 동학 농민 운동 vs 갑오개혁, 3·1 운동 vs 6·10 만세 운동. 비슷한 사건을 표로 비교하면(원인/과정/결과/의의) 혼동하지 않습니다.' },
+      { h: '사료와 자료 읽기', p: '한국사 시험에서 사료나 지도를 주고 시대를 묻는 문제가 자주 나옵니다. 대표적인 사료의 키워드를 외워두세요. "만민공동회" → 독립협회 / "교정청" → 동학 농민 운동. 키워드 하나로 시대를 특정할 수 있습니다.' },
+      { h: '과외로 한국사 정복하기', p: '한국사는 체계적인 정리가 되면 빠르게 마스터할 수 있지만, 혼자 정리하면 시간이 오래 걸립니다. 과외 선생님이 시대별 핵심을 구조화해주고, 기출 유형별 접근법을 알려줍니다.' },
+    ],
+  },
+  한국사내신전략: {
+    sections: [
+      { h: '수업 내용이 곧 시험 범위', p: '한국사 내신은 교과서 + 수업 자료에서 나옵니다. 선생님이 수업에서 강조한 사건, 인물, 의의를 반드시 정리하세요. 교과서에 없는 보충 설명도 시험에 나올 수 있습니다.' },
+      { h: '연표와 마인드맵 활용', p: '시험 범위의 핵심 사건을 연표로 정리하고, 각 사건 간의 인과 관계를 마인드맵으로 그리세요. 시각적으로 정리하면 전체 구조가 머릿속에 들어옵니다.' },
+      { h: '서술형 대비', p: '한국사 서술형은 "~의 배경/원인/결과/의의를 서술하시오" 형식이 많습니다. 핵심 사건마다 배경-과정-결과-의의를 4줄로 정리해두면 어떤 서술형이 나와도 대응할 수 있습니다.' },
+      { h: '시험 전 벼락치기 전략', p: '시간이 없다면 연표 + 핵심 키워드만 반복하세요. 각 시대별 대표 사건 3개, 대표 인물 2명, 핵심 제도 1개만 외워도 기본 점수를 확보할 수 있습니다.' },
+      { h: '과외로 한국사 내신 올리기', p: '한국사는 정리가 잘 되어 있으면 쉽지만, 막연히 외우면 끝이 없습니다. 과외 선생님이 시대별 핵심을 구조화하고, 서술형 모의 문제를 출제해 연습시킵니다.' },
+    ],
+  },
+  한국사시대정리: {
+    sections: [
+      { h: '선사~고대: 국가의 형성', p: '구석기(뗀석기)→ 신석기(간석기, 빗살무늬토기)→ 청동기(고조선, 비파형동검). 고조선의 8조법은 당시 사회상을 보여줍니다. 철기 시대에 여러 나라(부여, 고구려, 옥저, 동예, 삼한)가 등장합니다.' },
+      { h: '삼국~남북국: 고대 국가 발전', p: '고구려(광개토대왕, 을지문덕)/ 백제(근초고왕, 무령왕)/ 신라(진흥왕, 화랑도). 통일신라의 골품제와 발해의 해동성국 시기를 비교하세요. 삼국의 불교 수용 순서(고→백→신)도 중요합니다.' },
+      { h: '고려: 무신정권과 대외 항쟁', p: '고려의 핵심은 과거제 실시, 무신 정변, 몽골 항쟁, 공민왕 개혁입니다. 고려청자, 팔만대장경, 상감기법 등 문화 성과도 시험에 자주 나옵니다.' },
+      { h: '조선: 유교 정치와 실학', p: '조선 전기: 훈민정음, 과전법, 비변사 / 조선 후기: 실학(유형원, 정약용), 대동법, 균역법. 임진왜란→병자호란 이후 사회 변화와 영·정조의 탕평책이 핵심입니다.' },
+      { h: '근현대: 개항~대한민국', p: '강화도 조약(1876)→ 동학농민운동→ 갑오개혁→ 대한제국→ 일제강점기(3·1운동, 임시정부)→ 광복→ 6·25→ 민주화. 근현대사는 사건의 시간 순서와 인과 관계를 정확히 알아야 합니다.' },
+    ],
+  },
+  한국사능력검정: {
+    sections: [
+      { h: '한능검 시험 구조 이해', p: '한국사능력검정시험은 심화(1~3급)와 기본(4~6급)으로 나뉩니다. 심화 1급은 70점 이상. 50문항 80분이며, 시대별로 골고루 출제됩니다. 공무원·군무원 등 취업에 필요한 자격이므로 1급을 목표로 하세요.' },
+      { h: '기출 반복이 핵심', p: '한능검은 기출에서 70% 이상 유사하게 출제됩니다. 최근 10회분 기출을 3회독 하세요. 1회독: 풀기 / 2회독: 오답 분석 + 개념 보충 / 3회독: 시간 내 풀기. 기출만 철저히 해도 1급이 가능합니다.' },
+      { h: '사료 키워드 암기', p: '"교정청" → 동학 / "과전법" → 조선 태조 / "비변사" → 중종 / "대동법" → 광해군. 사료에 등장하는 핵심 키워드와 시대를 연결하는 것이 빠른 풀이의 비결입니다. 키워드 100개를 정리하세요.' },
+      { h: '시대 구분 빠르게 하기', p: '문제를 읽자마자 시대를 특정할 수 있어야 합니다. 인물(세종→조선), 사건(임오군란→고종), 제도(골품제→신라)로 시대를 빠르게 파악하세요. 시대만 맞추면 선지 소거가 쉬워집니다.' },
+      { h: '과외로 한능검 준비하기', p: '한능검은 범위가 넓어서 혼자 정리하면 시간이 많이 걸립니다. 과외 선생님이 시대별 핵심 정리와 기출 분석을 효율적으로 진행하고, 약한 시대를 집중 보충합니다.' },
+    ],
+  },
+  수능한국사대비: {
+    sections: [
+      { h: '수능 한국사는 절대평가', p: '수능 한국사는 절대평가로, 40점 이상이면 1등급입니다. 20문항 중 8문제만 맞추면 되므로, 완벽하지 않아도 됩니다. 자주 나오는 유형만 확실히 잡으면 부담 없이 1등급을 받을 수 있습니다.' },
+      { h: '빈출 주제 TOP 10', p: '(1)고조선 (2)삼국의 문화 (3)고려 정치 (4)조선 전기 제도 (5)임진왜란·병자호란 (6)영·정조 (7)개항기 (8)일제강점기 (9)대한민국 정부 수립 (10)민주화 운동. 이 10가지를 확실히 하면 12문제 이상 맞출 수 있습니다.' },
+      { h: '연표 암기 전략', p: '핵심 연도 20개만 외우세요. 676(신라통일), 918(고려건국), 1392(조선건국), 1446(훈민정음), 1592(임진왜란), 1876(강화도조약), 1919(3·1운동), 1945(광복), 1950(6·25), 1987(6월항쟁). 이것만으로 시대 파악이 됩니다.' },
+      { h: '3주 완성 전략', p: '1주차: 선사~고려 개념 정리 + 기출 / 2주차: 조선~근대 개념 정리 + 기출 / 3주차: 일제~현대 + 전 범위 모의고사. 하루 1시간씩 3주면 수능 한국사 1등급이 충분합니다.' },
+      { h: '과외로 빠르게 끝내기', p: '과외 선생님과 함께하면 3주 완성이 2주로 줄어듭니다. 선생님이 핵심만 골라 설명하고, 기출 분석을 함께 하면 혼자 공부할 때보다 훨씬 효율적입니다.' },
+    ],
+  },
+};
+
+export function renderEduPage({ slug, title, desc, subject }) {
+  const content = EDU_CONTENT[slug];
+  if (!content) return null;
+
+  const subjectInfo = SUBJECTS[subject];
+  const pageTitle = `${title} | 드림과외 교육정보`;
+  const description = `${desc}. 드림과외가 알려드리는 ${subject} 학습 전략과 공부법.`;
+  const url = `/${slug}`;
+
+  const head = buildHead({ title: pageTitle, description, url, type: 'local' });
+
+  const otherArticles = EDU_ARTICLES[subject]
+    .filter(a => a.slug !== slug)
+    .map(a => `<a href="/${a.slug}">${a.title}</a>`)
+    .join('');
+
+  const allSubjectLinks = Object.entries(EDU_ARTICLES)
+    .map(([s, articles]) => {
+      const info = SUBJECTS[s];
+      return `<div style="margin-bottom:16px">
+        <strong>${info?.emoji || '📚'} ${s}</strong>
+        <div class="link-list" style="margin-top:8px">
+          ${articles.map(a => `<a href="/${a.slug}">${a.title}</a>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+
+  const imgIdx = ((slug.charCodeAt(0) + slug.charCodeAt(2)) % 6) + 1;
+
+  const body = `
+<section class="page-hero">
+  <div class="wrap page-hero-in">
+    <div class="region-badge">${subjectInfo?.emoji || '📚'} ${subject} 교육정보</div>
+    <h1 class="page-h1">${title.replace(subject + ' ', subject + ' <em>') + '</em>'}</h1>
+    <p class="page-desc">${desc}. 드림과외가 현장 경험을 바탕으로 정리한 실전 학습 가이드입니다.</p>
+    <div class="hero-btns">
+      <a href="/${subject}과외" class="btn-hero-sub">${subjectInfo?.emoji || '📚'} ${subject}과외 알아보기</a>
+      <button class="btn-hero-main" onclick="openModal()">✍️ 무료 상담 신청</button>
+    </div>
+  </div>
+</section>
+
+${content.sections.map((s, i) => `
+<section class="sec ${i % 2 === 0 ? 'sec-wh' : 'sec-bg'}">
+  <div class="wrap">
+    <span class="sec-label">STEP ${i + 1}</span>
+    <h2 class="sec-title"><em>${s.h}</em></h2>
+    <p style="font-size:15px;color:var(--ink);line-height:2;word-break:keep-all;max-width:800px">${s.p}</p>
+  </div>
+</section>`).join('')}
+
+${ctaBox(`${subject} 과외`)}
+
+<section class="sec sec-wh">
+  <div class="wrap">
+    <span class="sec-label">MORE</span>
+    <h2 class="sec-title">${subject} <em>교육정보</em> 더보기</h2>
+    <div class="link-list">${otherArticles}</div>
+  </div>
+</section>
+
+<section class="sec sec-bg">
+  <div class="wrap">
+    <span class="sec-label">ALL GUIDES</span>
+    <h2 class="sec-title">전 과목 <em>교육정보</em></h2>
+    <p class="sec-desc">과목별 공부법, 내신 전략, 수능 대비 가이드를 확인하세요.</p>
+    ${allSubjectLinks}
+  </div>
+</section>
+
+${consultForm({
+  leftTitle: '<em>' + subject + ' 과외</em> 무료 상담',
+  leftDesc: subject + ' 전문 선생님과 1:1 맞춤 수업을 시작하세요.',
+  leftPts: ['24시간 내 선생님 매칭', '첫 30분 무료 체험', '내신·수능 맞춤 커리큘럼', '언제든 선생님 교체 가능'],
+})}`;
+
+  return layout({ head, body, keyword: title, region: '' });
 }

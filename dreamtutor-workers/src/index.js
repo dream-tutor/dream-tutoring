@@ -1,5 +1,5 @@
 import { parseRoute, getAllRoutes, getCoreRoutes } from './router.js';
-import { renderDongPage, renderGuPage, renderSidoPage, renderSchoolPage, renderOnlinePage, renderHomePage, renderSubjectPage } from './renderer.js';
+import { renderDongPage, renderGuPage, renderSidoPage, renderSchoolPage, renderOnlinePage, renderHomePage, renderSubjectPage, renderEduPage } from './renderer.js';
 
 const SITE_URL = 'https://dreamtutor.kr';
 const CHUNK_SIZE = 45000;
@@ -57,8 +57,8 @@ export default {
     // 파비콘
     if (pathname === '/favicon.ico' || pathname === '/favicon.svg') {
       const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0D1B2A"/>
-  <text x="16" y="24" font-family="Georgia,serif" font-size="22" font-weight="700" fill="#F59E0B" text-anchor="middle">D</text>
+  <rect width="32" height="32" rx="8" fill="#3B3B3B"/>
+  <text x="16" y="24" font-family="Georgia,serif" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">D</text>
 </svg>`;
       return new Response(favicon, {
         headers: {
@@ -71,12 +71,12 @@ export default {
     // OG 이미지 동적 생성
     if (pathname === '/og-image.png') {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
-        <rect width="1200" height="630" fill="#0D1B2A"/>
-        <rect x="0" y="0" width="1200" height="6" fill="#2563EB"/>
+        <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F3E2E"/><stop offset=".5" stop-color="#4A6741"/><stop offset="1" stop-color="#5A8F7B"/></linearGradient></defs>
+        <rect width="1200" height="630" fill="url(#bg)"/>
         <text x="600" y="260" font-family="Arial,sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle">드림과외</text>
-        <text x="600" y="360" font-family="Arial,sans-serif" font-size="42" fill="#93c5fd" text-anchor="middle">전국 1:1 전문 과외 매칭 서비스</text>
-        <text x="600" y="440" font-family="Arial,sans-serif" font-size="30" fill="rgba(255,255,255,0.6)" text-anchor="middle">초·중·고 전 과목 · 방문·화상과외 · 24시간 내 매칭</text>
-        <rect x="460" y="490" width="280" height="60" rx="12" fill="#2563EB"/>
+        <text x="600" y="360" font-family="Arial,sans-serif" font-size="42" fill="rgba(255,255,255,.8)" text-anchor="middle">전국 1:1 전문 과외 매칭 서비스</text>
+        <text x="600" y="440" font-family="Arial,sans-serif" font-size="30" fill="rgba(255,255,255,0.55)" text-anchor="middle">초·중·고 전 과목 · 방문·화상과외 · 24시간 내 매칭</text>
+        <rect x="460" y="490" width="280" height="60" rx="12" fill="#C4956A"/>
         <text x="600" y="528" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="white" text-anchor="middle">무료 상담 신청</text>
       </svg>`;
       return new Response(svg, {
@@ -144,6 +144,8 @@ export default {
         html = renderOnlinePage(route.params);
       } else if (route.type === 'subject') {
         html = renderSubjectPage(route.params);
+      } else if (route.type === 'edu') {
+        html = renderEduPage(route.params);
       } else {
         return new Response(null, { status: 404 });
       }

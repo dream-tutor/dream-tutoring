@@ -7,6 +7,60 @@ import {
 } from './data/regions.js';
 import { SCHOOL_TO_LOCATION } from './data/schools.js';
 
+// ── 교육정보 라우트 정의 ──
+export const EDU_ARTICLES = {
+  수학: [
+    { slug: '수학공부법', title: '수학 공부법 가이드', desc: '수학 성적 올리는 단계별 공부법' },
+    { slug: '수학내신전략', title: '수학 내신 전략', desc: '학교 시험 완벽 대비 내신 전략' },
+    { slug: '수학오답관리', title: '수학 오답 관리법', desc: '틀린 문제로 실력 키우는 오답 노트 전략' },
+    { slug: '수학개념정리', title: '수학 개념 정리 비법', desc: '교과서 개념을 내 것으로 만드는 방법' },
+    { slug: '수능수학대비', title: '수능 수학 대비 전략', desc: '수능 수학 고득점 로드맵' },
+  ],
+  영어: [
+    { slug: '영어공부법', title: '영어 공부법 가이드', desc: '영어 실력 향상 단계별 가이드' },
+    { slug: '영어내신전략', title: '영어 내신 전략', desc: '학교 영어 시험 만점 전략' },
+    { slug: '영어독해전략', title: '영어 독해 전략', desc: '지문 유형별 독해 접근법' },
+    { slug: '영어어휘암기', title: '영어 어휘 암기법', desc: '효율적인 영단어 암기 전략' },
+    { slug: '수능영어대비', title: '수능 영어 대비 전략', desc: '수능 영어 등급 올리는 로드맵' },
+  ],
+  국어: [
+    { slug: '국어공부법', title: '국어 공부법 가이드', desc: '국어 성적 올리는 핵심 공부법' },
+    { slug: '국어내신전략', title: '국어 내신 전략', desc: '국어 내신 만점 완벽 가이드' },
+    { slug: '국어비문학전략', title: '비문학 독해 전략', desc: '비문학 지문 정복 가이드' },
+    { slug: '국어문학분석', title: '문학 작품 분석법', desc: '문학 작품 해석과 감상의 기술' },
+    { slug: '수능국어대비', title: '수능 국어 대비 전략', desc: '수능 국어 안정적 고득점 전략' },
+  ],
+  과학: [
+    { slug: '과학공부법', title: '과학 공부법 가이드', desc: '과학 성적 올리는 학습 전략' },
+    { slug: '과학내신전략', title: '과학 내신 전략', desc: '과학 내신 대비 완벽 가이드' },
+    { slug: '과학실험대비', title: '과학 실험·수행평가 대비', desc: '수행평가 만점 받는 실험 보고서 전략' },
+    { slug: '과학개념학습', title: '과학 개념 학습법', desc: '과학 핵심 개념 체계적 이해법' },
+    { slug: '수능과학대비', title: '수능 과학탐구 대비', desc: '수능 과탐 선택과목 전략' },
+  ],
+  사회: [
+    { slug: '사회공부법', title: '사회 공부법 가이드', desc: '사회 과목 효율적 학습법' },
+    { slug: '사회내신전략', title: '사회 내신 전략', desc: '사회 내신 대비 핵심 전략' },
+    { slug: '사회서술형대비', title: '사회 서술형 대비', desc: '서술형 평가 고득점 전략' },
+    { slug: '사회시사연계', title: '사회 시사 연계 학습', desc: '시사 이슈와 교과 연계 학습법' },
+    { slug: '수능사회대비', title: '수능 사회탐구 대비', desc: '수능 사탐 고득점 로드맵' },
+  ],
+  한국사: [
+    { slug: '한국사공부법', title: '한국사 공부법 가이드', desc: '한국사 암기법과 흐름 정리' },
+    { slug: '한국사내신전략', title: '한국사 내신 전략', desc: '한국사 내신 만점 전략' },
+    { slug: '한국사시대정리', title: '한국사 시대별 정리', desc: '시대별 핵심 사건·인물 총정리' },
+    { slug: '한국사능력검정', title: '한국사능력검정시험 대비', desc: '한능검 1급 합격 전략' },
+    { slug: '수능한국사대비', title: '수능 한국사 대비', desc: '수능 한국사 만점 전략' },
+  ],
+};
+
+// 교육정보 slug → 기사 정보 매핑 (O(1) 조회)
+export const EDU_SLUG_MAP = {};
+for (const [subject, articles] of Object.entries(EDU_ARTICLES)) {
+  for (const article of articles) {
+    EDU_SLUG_MAP[article.slug] = { ...article, subject };
+  }
+}
+
 // 전체 동 목록 (방문가능)
 const ALL_DONGS = Object.values(VISIT_REGIONS)
   .flatMap(gus => Object.values(gus).flat());
@@ -77,8 +131,14 @@ for (const school of Object.keys(SCHOOL_TO_LOCATION)) {
  * @returns {{ type, params } | null}
  */
 export function parseRoute(pathname) {
-  // 슬래시 제거 후 "과외" 접미사 제거
   let slug = decodeURIComponent(pathname.replace(/^\//, '').replace(/\/$/, ''));
+
+  // 교육정보 페이지 매칭 (과외 접미사 없는 별도 라우트)
+  if (EDU_SLUG_MAP[slug]) {
+    return { type: 'edu', params: EDU_SLUG_MAP[slug] };
+  }
+
+  // 슬래시 제거 후 "과외" 접미사 제거
   if (!slug.endsWith('과외')) return null;
   slug = slug.replace(/과외$/, '');
 
@@ -325,9 +385,16 @@ export function getAllRoutes() {
 }
 
 // 핵심 페이지 경로 (sitemap-core.xml용, priority 0.9)
-// 시도 전체 조합 + 방문가능 시군구 base URL
+// 시도 전체 조합 + 방문가능 시군구 base URL + 교육정보 페이지
 export function getCoreRoutes() {
   const routes = [];
+
+  // 교육정보 페이지 (핵심 콘텐츠)
+  for (const articles of Object.values(EDU_ARTICLES)) {
+    for (const a of articles) {
+      routes.push(`/${a.slug}`);
+    }
+  }
 
   // 시도 레벨 (과목·학년 전체 조합)
   for (const sido of ALL_SIDO) {
